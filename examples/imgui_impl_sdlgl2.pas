@@ -22,6 +22,7 @@ procedure ImGui_ImplSdlGL2_Init();
 procedure ImGui_ImplSdlGL2_Shutdown();
 procedure ImGui_ImplSdlGL2_NewFrame(window: PSDL_Window);
 procedure Imgui_ImplSdlGL2_RenderDrawLists(const draw_data: PImDrawData);
+function  ImGui_ImplSdlGL2_ProcessEvent(event: PSDL_Event): boolean; 
 
 implementation
 
@@ -31,6 +32,44 @@ var
   g_MousePressed: array[0..2] of bool = ( false, false, false );
   g_MouseWheel: single = 0.0;
   g_FontTexture: GLuint = 0;
+
+function ImGui_ImplSdlGL2_ProcessEvent(event: PSDL_Event): boolean;
+var
+  key: TSDL_KeyCode;
+  io: PImGuiIO;
+begin
+  result := false;
+  io := igGetIO();
+  case event^.type_ of
+  SDL_MOUSEWHEEL: begin
+      if (event^.wheel.y > 0) then
+          g_MouseWheel := 1;
+      if (event^.wheel.y < 0) then
+          g_MouseWheel := -1;
+      result := true;
+      end;
+  SDL_MOUSEBUTTONDOWN: begin
+      if (event^.button.button = SDL_BUTTON_LEFT)   then g_MousePressed[0] := true;
+      if (event^.button.button = SDL_BUTTON_RIGHT)  then g_MousePressed[1] := true;
+      if (event^.button.button = SDL_BUTTON_MIDDLE) then g_MousePressed[2] := true;
+      result := true;
+  end;
+  SDL_TEXTINPUT: begin
+      ImGuiIO_AddInputCharactersUTF8(event^.text.text);
+      result := true;
+  end;
+  SDL_KEYDOWN, SDL_KEYUP: begin
+      key := event^.key.keysym.sym and (not SDLK_SCANCODE_MASK);
+      io^.KeysDown[key] := event^.type_ = SDL_KEYDOWN;
+      io^.KeyShift := (SDL_GetModState() and KMOD_SHIFT) <> 0;
+      io^.KeyCtrl  := (SDL_GetModState() and KMOD_CTRL)  <> 0;
+      io^.KeyAlt   := (SDL_GetModState() and KMOD_ALT)   <> 0;
+      io^.KeySuper := (SDL_GetModState() and KMOD_GUI)   <> 0;
+      result := true;
+  end;
+  end;
+end;
+
 
 procedure ImGui_ImplSdlGL2_CreateDeviceObjects();
 var
@@ -128,11 +167,13 @@ begin
 
     // Setup display size (every frame to accommodate for window resizing)
     SDL_GetWindowSize(window, @w, @h);
-    //SDL_GL_GetDrawableSize(window, @display_w, @display_h);
-    io^.DisplaySize.x := w;
-    io^.DisplaySize.y := h;
-    io^.DisplayFramebufferScale.x := 1;
-    io^.DisplayFramebufferScale.y := 1;
+    io^.DisplaySize := ImVec2Init(w, h);
+    io^.DisplayFramebufferScale := ImVec2Init(1, 1);
+
+    // SDL_GL_GetDrawableSize might be missing in pascal sdl2 headers - remove the next 3 lines in that case
+    SDL_GL_GetDrawableSize(window, @display_w, @display_h);
+    if (w <> 0) and (h <> 0) and ((w <> display_w) or (h <> display_h)) then
+        io^.DisplayFramebufferScale := ImVec2Init(display_w/w, display_h/h);
 
     // Setup time step
     time := SDL_GetTicks();
@@ -146,19 +187,15 @@ begin
     // Setup inputs
     // (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
     mouseMask := SDL_GetMouseState(@mx, @my);
-    if ((SDL_GetWindowFlags(window) and SDL_WINDOW_MOUSE_FOCUS) <> 0) then begin
-        io^.MousePos.x := mx;   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
-        io^.MousePos.y := my;
-    end else begin
-        io^.MousePos.x := -1;
-        io^.MousePos.y := -1;
-    end;
+    if ((SDL_GetWindowFlags(window) and SDL_WINDOW_MOUSE_FOCUS) <> 0) then
+        io^.MousePos := ImVec2Init(mx, my)   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
+    else
+        io^.MousePos := ImVec2Init(-1,-1);
 
-    //todo
     // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-    //io^.MouseDown[0] = (g_MousePressed[0] or (mouseMask and SDL_BUTTON(SDL_BUTTON_LEFT))  ) <> 0;
-    //io^.MouseDown[1] = (g_MousePressed[1] or (mouseMask and SDL_BUTTON(SDL_BUTTON_RIGHT)) ) <> 0;
-    //io^.MouseDown[2] = (g_MousePressed[2] or (mouseMask and SDL_BUTTON(SDL_BUTTON_MIDDLE))) <> 0;
+    io^.MouseDown[0] := g_MousePressed[0] or (mouseMask and SDL_BUTTON(SDL_BUTTON_LEFT) <> 0);
+    io^.MouseDown[1] := g_MousePressed[1] or (mouseMask and SDL_BUTTON(SDL_BUTTON_RIGHT) <> 0);
+    io^.MouseDown[2] := g_MousePressed[2] or (mouseMask and SDL_BUTTON(SDL_BUTTON_MIDDLE) <> 0);
     g_MousePressed[0] := false;
     g_MousePressed[1] := false;
     g_MousePressed[2] := false;
@@ -177,6 +214,7 @@ procedure Imgui_ImplSdlGL2_RenderDrawLists(const draw_data: PImDrawData);
 var
   last_texture: GLint;
   last_viewport: array[0..3] of GLint;
+  last_scissor_box: array[0..3] of GLint;
   io: PImGuiIO;
   fb_width, fb_height, n, cmd_i: integer;
   cmd_list: PImDrawList;
@@ -186,15 +224,15 @@ var
 begin
   // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
   io := igGetIO();
-  fb_width  := trunc(io^.DisplaySize.x);// * io.DisplayFramebufferScale.x;
-  fb_height := trunc(io^.DisplaySize.y);// * io.DisplayFramebufferScale.y;
+  fb_width  := trunc(io^.DisplaySize.x * io^.DisplayFramebufferScale.x);
+  fb_height := trunc(io^.DisplaySize.y * io^.DisplayFramebufferScale.y);
   if (fb_width = 0) or (fb_height = 0) then
       exit;
   //draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
   glGetIntegerv(GL_TEXTURE_BINDING_2D, @last_texture);
-  glGetIntegerv(GL_VIEWPORT, last_viewport);
-  //GLint last_scissor_box[4]; glGetIntegerv(GL_SCISSOR_BOX, last_scissor_box);
+  glGetIntegerv(GL_VIEWPORT, @last_viewport);
+  glGetIntegerv(GL_SCISSOR_BOX, @last_scissor_box);
   glPushAttrib(GL_ENABLE_BIT or GL_COLOR_BUFFER_BIT or GL_TRANSFORM_BIT);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -255,7 +293,7 @@ begin
   glPopMatrix();
   glPopAttrib();
   glViewport(last_viewport[0], last_viewport[1], GLsizei(last_viewport[2]), GLsizei(last_viewport[3]));
-  //glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
+  glScissor(last_scissor_box[0], last_scissor_box[1], GLsizei(last_scissor_box[2]), GLsizei(last_scissor_box[3]));
 end;
 
 end.

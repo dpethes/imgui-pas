@@ -1,11 +1,6 @@
 {
 Bindings for dear imgui (AKA ImGui) - a bloat-free graphical user interface library for C++
 Based on cimgui+ImGui 1.49/1.50
-Issues:
-- va_args functions ignored
-- function address parameters ignored
-- added types for fixed size array parameters (should be replaced with pointers?)
-- no tests on linux
 }
 unit imgui;
 
@@ -13,10 +8,11 @@ interface
 
 {$IFDEF FPC}
 {$PACKRECORDS C}
+uses dynlibs;
 {$ENDIF}
 
 const
-  ImguiLibName = 'cimgui.dll';
+  ImguiLibName = 'cimgui.' + SharedSuffix;
 
 type
   bool = boolean;
@@ -65,7 +61,19 @@ type
   ImGuiSetCond = longint;
   ImGuiInputTextFlags = longint;
   ImGuiSelectableFlags = longint;
-  ImGuiTreeNodeFlags = longint;
+
+  ImGuiTreeNodeFlags = (
+      Selected = 1 shl 0,
+      Framed = 1 shl 1,
+      AllowOverlapMode = 1 shl 2,
+      NoTreePushOnOpen = 1 shl 3,
+      NoAutoOpenOnLog = 1 shl 4,
+      DefaultOpen = 1 shl 5,
+      OpenOnDoubleClick = 1 shl 6,
+      OpenOnArrow = 1 shl 7,
+      Leaf = 1 shl 8,
+      Bullet = 1 shl 9
+  );
 
   ImGuiKey_ = (
       ImGuiKey_Tab,       // for tabbing through fields
@@ -217,7 +225,7 @@ procedure igShowTestWindow(opened: Pbool); cdecl; external ImguiLibName;
 procedure igShowMetricsWindow(opened: Pbool); cdecl; external ImguiLibName;
 
 { Window }
-function  igBegin(Name: PChar; p_open: Pbool; flags: ImGuiWindowFlags): bool; cdecl; external ImguiLibName;
+function  igBegin(Name: PChar; p_open: Pbool = nil; flags: ImGuiWindowFlags = 0): bool; cdecl; external ImguiLibName;
 function  igBegin2(Name: PChar; p_open: Pbool; size_on_first_use: ImVec2; bg_alpha: single; flags: ImGuiWindowFlags): bool; cdecl; external ImguiLibName;
 procedure igEnd; cdecl; external ImguiLibName;
 function  igBeginChild(str_id: PChar; size: ImVec2; border: bool; extra_flags: ImGuiWindowFlags): bool; cdecl; external ImguiLibName;
@@ -610,11 +618,9 @@ function  ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(struct ImFontAtlas* a
 procedure ImFontAtlas_ClearTexData(atlas: PImFontAtlas); cdecl; external ImguiLibName;
 procedure ImFontAtlas_Clear(atlas: PImFontAtlas); cdecl; external ImguiLibName;
 
-{
-CIMGUI_API void             ImGuiIO_AddInputCharacter(unsigned short c);
-CIMGUI_API void             ImGuiIO_AddInputCharactersUTF8(CONST char* utf8_chars);
-CIMGUI_API void             ImGuiIO_ClearInputCharacters();
-}
+procedure ImGuiIO_AddInputCharacter(c: word); cdecl; external ImguiLibName;
+procedure ImGuiIO_AddInputCharactersUTF8(utf8_chars: pchar); cdecl; external ImguiLibName;
+procedure ImGuiIO_ClearInputCharacters(); cdecl; external ImguiLibName;
 
 {ImDrawData }
 procedure ImDrawData_DeIndexAllBuffers(drawData: PImDrawData); cdecl; external ImguiLibName;
@@ -693,6 +699,15 @@ procedure ImDrawList_UpdateClipRect(list: PImDrawList); cdecl; external ImguiLib
 procedure ImDrawList_UpdateTextureID(list: PImDrawList); cdecl; external ImguiLibName;
 
 
+//binding helpers
+function ImVec2Init(const x, y: single): Imvec2; inline;
+
 implementation
+
+function ImVec2Init(const x, y: single): Imvec2;
+begin
+  result.x := x;
+  result.y := y;
+end;
 
 end.

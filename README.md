@@ -2,10 +2,10 @@
 Pascal bindings for dear imgui (AKA ImGui) - a bloat-free graphical user interface library for C++
 
 These bindings wrap the C functions exported from cimgui library, so you need
-a recent cimgui build to use them. Current version is for ImGui 1.49.
+a recent cimgui build to use them. Current version is for ImGui 1.50 (commit b8043d3ee5622e55408119dc7023f2056755bb52).
 
 ## Issues/Todo
-* add example/demo project
+* add demo project
 * translate more structs, enums
 * re-add default parameter values from imgui.h
 * add class wrappers around IO/FontAtlas and such  to make it more convenient to use / better match original C++ versions
