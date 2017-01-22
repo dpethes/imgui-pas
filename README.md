@@ -5,6 +5,8 @@ These bindings wrap the C functions exported from cimgui library, so you need
 a recent cimgui build to use them. Current version is for ImGui 1.49.
 
 ## Issues/Todo
+* add example/demo project
+* translate more structs, enums
 * re-add default parameter values from imgui.h
 * add class wrappers around IO/FontAtlas and such  to make it more convenient to use / better match original C++ versions
 * va_args functions ignored
@@ -16,7 +18,7 @@ a recent cimgui build to use them. Current version is for ImGui 1.49.
 Builds with Freepascal 3.0.0 and later, other compilers are untested (it should support 2.6.0 and higher though).
 
 ## Usage
-Copy imgui.pas and cimgui binary to your project folder. See the examples for how to integrate it with your rendering pipeline (work in progress) and the "getting started" section in imgui.cpp.
+Copy imgui.pas and cimgui binary to your project folder. See the examples for how to integrate it with your rendering pipeline and the "getting started" section in imgui.cpp.
 
 ## See Also
 https://github.com/ocornut/imgui
