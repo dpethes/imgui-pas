@@ -21,7 +21,7 @@ uses
 procedure ImGui_ImplSdlGL2_Init();
 procedure ImGui_ImplSdlGL2_Shutdown();
 procedure ImGui_ImplSdlGL2_NewFrame(window: PSDL_Window);
-procedure Imgui_ImplSdlGL2_RenderDrawLists(const draw_data: PImDrawData);
+procedure Imgui_ImplSdlGL2_RenderDrawLists(draw_data: PImDrawData); cdecl;
 function  ImGui_ImplSdlGL2_ProcessEvent(event: PSDL_Event): boolean; 
 
 implementation
@@ -139,7 +139,7 @@ begin
   io^.KeyMap[ImGuiKey_Y] := SDLK_y;
   io^.KeyMap[ImGuiKey_Z] := SDLK_z;
 
-  io^.RenderDrawListsFn := nil;  //todo assign
+  io^.RenderDrawListsFn := @Imgui_ImplSdlGL2_RenderDrawLists;
   io^.SetClipboardTextFn := nil;
   io^.GetClipboardTextFn := nil;
   io^.ClipboardUserData := nil;
@@ -210,7 +210,7 @@ begin
     igNewFrame();
 end;
 
-procedure Imgui_ImplSdlGL2_RenderDrawLists(const draw_data: PImDrawData);
+procedure Imgui_ImplSdlGL2_RenderDrawLists(draw_data: PImDrawData); cdecl;
 var
   last_texture: GLint;
   last_viewport: array[0..3] of GLint;
