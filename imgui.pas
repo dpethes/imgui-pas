@@ -35,7 +35,6 @@ type
   PImGuiContext = Pointer;
   PImGuiSizeConstraintCallbackData = ^ImGuiSizeConstraintCallbackData;
   PImGuiStorage = ^ImGuiStorage;
-  PImGuiStyle = ^ImGuiStyle;
   PImGuiTextEditCallbackData = ^ImGuiTextEditCallbackData;
 
   ImVec2 = record
@@ -61,6 +60,8 @@ type
   ImGuiSetCond = longint;
   ImGuiInputTextFlags = longint;
   ImGuiSelectableFlags = longint;
+
+  { Enums }
 
   ImGuiTreeNodeFlags = (
       Selected = 1 shl 0,
@@ -98,7 +99,82 @@ type
       //ImGuiKey_COUNT    // this is unnecessary, if we declare KeyMap as array[ImGuiKey_]
   );
 
-  //structs
+  ImGuiCol_ = (
+      ImGuiCol_Text,
+      ImGuiCol_TextDisabled,
+      ImGuiCol_WindowBg,
+      ImGuiCol_ChildWindowBg,
+      ImGuiCol_PopupBg,
+      ImGuiCol_Border,
+      ImGuiCol_BorderShadow,
+      ImGuiCol_FrameBg,
+      ImGuiCol_FrameBgHovered,
+      ImGuiCol_FrameBgActive,
+      ImGuiCol_TitleBg,
+      ImGuiCol_TitleBgCollapsed,
+      ImGuiCol_TitleBgActive,
+      ImGuiCol_MenuBarBg,
+      ImGuiCol_ScrollbarBg,
+      ImGuiCol_ScrollbarGrab,
+      ImGuiCol_ScrollbarGrabHovered,
+      ImGuiCol_ScrollbarGrabActive,
+      ImGuiCol_ComboBg,
+      ImGuiCol_CheckMark,
+      ImGuiCol_SliderGrab,
+      ImGuiCol_SliderGrabActive,
+      ImGuiCol_Button,
+      ImGuiCol_ButtonHovered,
+      ImGuiCol_ButtonActive,
+      ImGuiCol_Header,
+      ImGuiCol_HeaderHovered,
+      ImGuiCol_HeaderActive,
+      ImGuiCol_Column,
+      ImGuiCol_ColumnHovered,
+      ImGuiCol_ColumnActive,
+      ImGuiCol_ResizeGrip,
+      ImGuiCol_ResizeGripHovered,
+      ImGuiCol_ResizeGripActive,
+      ImGuiCol_CloseButton,
+      ImGuiCol_CloseButtonHovered,
+      ImGuiCol_CloseButtonActive,
+      ImGuiCol_PlotLines,
+      ImGuiCol_PlotLinesHovered,
+      ImGuiCol_PlotHistogram,
+      ImGuiCol_PlotHistogramHovered,
+      ImGuiCol_TextSelectedBg,
+      ImGuiCol_ModalWindowDarkening
+      //ImGuiCol_COUNT  - unnecessary
+  );
+
+  { Structs }
+  ImGuiStyle = record
+      Alpha : single;
+      WindowPadding : ImVec2;
+      WindowMinSize : ImVec2;
+      WindowRounding : single;
+      WindowTitleAlign : ImVec2;
+      ChildWindowRounding : single;
+      FramePadding : ImVec2;
+      FrameRounding : single;
+      ItemSpacing : ImVec2;
+      ItemInnerSpacing : ImVec2;
+      TouchExtraPadding : ImVec2;
+      IndentSpacing : single;
+      ColumnsMinSpacing : single;
+      ScrollbarSize : single;
+      ScrollbarRounding : single;
+      GrabMinSize : single;
+      GrabRounding : single;
+      ButtonTextAlign : ImVec2;
+      DisplayWindowPadding : ImVec2;
+      DisplaySafeAreaPadding : ImVec2;
+      AntiAliasedLines : bool;
+      AntiAliasedShapes : bool;
+      CurveTessellationTol : single;
+      Colors: array[ImGuiCol_] of ImVec4;
+  end;
+  PImGuiStyle = ^ImGuiStyle;
+
   ImGuiIO = record
       DisplaySize : ImVec2;
       DeltaTime : single;
@@ -194,8 +270,6 @@ type
       TotalIdxCount: integer;
   end;
 
-  ImGuiStyle = record
-  end;
   ImGuiTextEditCallbackData = record
   end;
   ImGuiSizeConstraintCallbackData = record
