@@ -9,14 +9,14 @@ If you are new to ImGui, see examples/README.txt and documentation at the top of
 https://github.com/ocornut/imgui
 }
 
-unit imgui_impl_sdlgl2;
+unit fpimgui_impl_sdlgl2;
 {$mode objfpc}{$H+}
 
 interface
 
 uses
   sdl2, gl, glu, GLext,
-  imgui;
+  fpimgui;
 
 procedure ImGui_ImplSdlGL2_Init();
 procedure ImGui_ImplSdlGL2_Shutdown();
