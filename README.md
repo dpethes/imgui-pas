@@ -20,6 +20,7 @@ Builds with Freepascal 3.0.0 and later, other compilers are untested (it should 
 
 ## Usage
 Copy sources and cimgui binary to your project folder. See the examples for how to integrate it with your rendering pipeline and the "getting started" section in imgui.cpp.
+There's also a very basic demo program that draws some ImGui windows in a SDL2 window with OpenGL context.
 
 ## See Also
 https://github.com/ocornut/imgui
