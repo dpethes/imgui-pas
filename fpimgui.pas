@@ -3,6 +3,7 @@ Bindings for dear imgui (AKA ImGui) - a bloat-free graphical user interface libr
 Based on cimgui+ImGui 1.49/1.50
 }
 unit fpimgui;
+{$mode objfpc}{$H+}
 
 interface
 
@@ -776,6 +777,44 @@ procedure ImDrawList_UpdateTextureID(list: PImDrawList); cdecl; external ImguiLi
 //binding helpers
 function ImVec2Init(const x, y: single): Imvec2; inline;
 
+{ Static ImGui class, wraps external igSomething calls
+  Used for:
+  - having original's C++ styled API
+  - adding default parameters
+  - using native strings
+  Things to consider:
+  - perhaps the methods could be inlined to prevent calling overhead
+  - use var parameters instead of pointers where possible
+}
+type
+  ImGui = class
+  public
+    class function  GetIO(): PImGuiIO;
+    class function  GetStyle(): PImGuiStyle;
+    class function  GetDrawData(): PImDrawData;
+    class procedure NewFrame;
+    class procedure Render;
+    class procedure Shutdown;
+    class procedure ShowUserGuide;
+    class procedure ShowStyleEditor(ref: PImGuiStyle);
+    class procedure ShowTestWindow(p_open: Pbool = nil);
+    class procedure ShowMetricsWindow(p_open: Pbool = nil);
+
+    { Window }
+    class function  Begin_(name: string; p_open: Pbool = nil; flags: ImGuiWindowFlags = 0): Boolean;
+    class procedure End_;
+
+    { Widgets }
+    { Text() just wraps TextUnformatted, while it originally takes C-style string with formatting params.
+      The overloaded version with variable params uses native Format() from sysutils }
+    class procedure Text(const text_: string);
+    class procedure Text(const Fmt: string; const Args: array of Const);
+    class procedure TextUnformatted(const _text: string);
+    class procedure TextUnformatted(const _text: PChar; const text_end: PChar = nil);
+    class function  Button(_label: string; size: ImVec2): bool;
+    class function  Button(_label: string): bool; //overload for default size (0,0)
+  end;
+
 implementation
 
 function ImVec2Init(const x, y: single): Imvec2;
@@ -783,5 +822,33 @@ begin
   result.x := x;
   result.y := y;
 end;
+
+{ ImGui
+  keep functions short, they're mostly just wrappers. Inlining begin ... end is ok
+}
+
+class function ImGui.GetIO: PImGuiIO; begin result := igGetIO end;
+class function ImGui.GetStyle: PImGuiStyle; begin result := igGetStyle end;
+class function ImGui.GetDrawData: PImDrawData; begin result := igGetDrawData end;
+class procedure ImGui.NewFrame; begin igNewFrame end;
+class procedure ImGui.Render; begin igRender end;
+class procedure ImGui.Shutdown; begin igShutdown end;
+class procedure ImGui.ShowUserGuide; begin igShowUserGuide end;
+class procedure ImGui.ShowStyleEditor(ref: PImGuiStyle); begin igShowStyleEditor(ref) end;
+class procedure ImGui.ShowTestWindow(p_open: Pbool); begin igShowTestWindow(p_open) end;
+class procedure ImGui.ShowMetricsWindow(p_open: Pbool); begin ShowMetricsWindow(p_open) end;
+
+class function ImGui.Begin_(name: string; p_open: Pbool; flags: ImGuiWindowFlags): Boolean;
+begin result := igBegin(pchar(name), p_open, flags); end;
+class procedure ImGui.End_; begin igEnd end;
+
+class procedure ImGui.Text(const text_: string); begin TextUnformatted(text_) end;
+class procedure ImGui.Text(const Fmt: string; const Args: array of const); begin TextUnformatted(Format(fmt, args)) end;
+class procedure ImGui.TextUnformatted(const _text: string); begin igTextUnformatted(pchar(_text), nil) end;
+class procedure ImGui.TextUnformatted(const _text: PChar; const text_end: PChar); begin igTextUnformatted(_text, text_end) end;
+
+class function ImGui.Button(_label: string; size: ImVec2): bool; begin result := igButton(pchar(_label), size) end;
+class function ImGui.Button(_label: string): bool; begin result := Button(_label, ImVec2Init(0,0)) end;
+
 
 end.
