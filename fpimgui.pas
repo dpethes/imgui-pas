@@ -1,16 +1,17 @@
 {
 Bindings for dear imgui (AKA ImGui) - a bloat-free graphical user interface library for C++
 Based on cimgui+ImGui 1.49/1.50
+Not all functions were tested.
 }
 unit fpimgui;
 {$mode objfpc}{$H+}
 
 interface
 
-{$IFDEF FPC}
+uses
 {$PACKRECORDS C}
-uses dynlibs;
-{$ENDIF}
+dynlibs,   //for SharedSuffix
+sysutils;  //for Format()
 
 const
   ImguiLibName = 'cimgui.' + SharedSuffix;
@@ -301,7 +302,7 @@ procedure igShowMetricsWindow(opened: Pbool); cdecl; external ImguiLibName;
 
 { Window }
 function  igBegin(Name: PChar; p_open: Pbool = nil; flags: ImGuiWindowFlags = 0): bool; cdecl; external ImguiLibName;
-function  igBegin2(Name: PChar; p_open: Pbool; size_on_first_use: ImVec2; bg_alpha: single; flags: ImGuiWindowFlags): bool; cdecl; external ImguiLibName;
+  // OBSOLETE function  igBegin2(Name: PChar; p_open: Pbool; size_on_first_use: ImVec2; bg_alpha: single; flags: ImGuiWindowFlags): bool; cdecl; external ImguiLibName;
 procedure igEnd; cdecl; external ImguiLibName;
 function  igBeginChild(str_id: PChar; size: ImVec2; border: bool; extra_flags: ImGuiWindowFlags): bool; cdecl; external ImguiLibName;
 function  igBeginChildEx(id: ImGuiID; size: ImVec2; border: bool; extra_flags: ImGuiWindowFlags): bool; cdecl; external ImguiLibName;
@@ -399,7 +400,7 @@ function  igGetTextLineHeight: single; cdecl; external ImguiLibName;
 function  igGetTextLineHeightWithSpacing: single; cdecl; external ImguiLibName;
 function  igGetItemsLineHeightWithSpacing: single; cdecl; external ImguiLibName;
 
-{Columns }
+{ Columns }
 procedure igColumns(Count: longint; id: PChar; border: bool); cdecl; external ImguiLibName;
 procedure igNextColumn; cdecl; external ImguiLibName;
 function  igGetColumnIndex: longint; cdecl; external ImguiLibName;

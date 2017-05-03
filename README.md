@@ -9,16 +9,17 @@ a recent cimgui build to use them. Current version is for ImGui 1.50 (commit b80
 * translate more structs, enums
 * re-add default parameter values from imgui.h
 * add class wrappers around IO/FontAtlas and such  to make it more convenient to use / better match original C++ versions
-* va_args functions ignored
 * function address parameters ignored
 * added types for fixed size array parameters (should be replaced with pointers?)
-* no tests on linux yet
+* no tests on linux/macOS yet
+Other:
+* va_args functions are ignored, use native Format() instead
 
 ## Building
 Builds with Freepascal 3.0.0 and later, other compilers are untested (it should support 2.6.0 and higher though).
 
 ## Usage
-Copy imgui.pas and cimgui binary to your project folder. See the examples for how to integrate it with your rendering pipeline and the "getting started" section in imgui.cpp.
+Copy sources and cimgui binary to your project folder. See the examples for how to integrate it with your rendering pipeline and the "getting started" section in imgui.cpp.
 
 ## See Also
 https://github.com/ocornut/imgui
