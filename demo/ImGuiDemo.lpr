@@ -25,6 +25,7 @@ begin
       //(do some opengl calls...)
 
       ImGui.Begin_('Greeting');
+      ImGui.SetWindowPos(ImVec2Init(100,100));
       ImGui.Text('Hello, world %d', [counter]);
       if ImGui.Button('OK') then begin
           //button was pressed, do something special!
