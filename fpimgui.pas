@@ -30,14 +30,7 @@ type
   TLongInt3 = array[0..2] of longint;
   TLongInt4 = array[0..3] of longint;
 
-  PImDrawData = ^ImDrawData;
-  PImFont = ^ImFont;
-  PImFontAtlas = ^ImFontAtlas;
-  PImFontConfig = ^ImFontConfig;
   PImGuiContext = Pointer;
-  PImGuiSizeConstraintCallbackData = ^ImGuiSizeConstraintCallbackData;
-  PImGuiStorage = ^ImGuiStorage;
-  PImGuiTextEditCallbackData = ^ImGuiTextEditCallbackData;
 
   ImVec2 = record
       x, y: single;
@@ -58,24 +51,57 @@ type
   ImGuiAlign = longint;
   ImGuiColorEditMode = longint;
   ImGuiMouseCursor = longint;
-  ImGuiWindowFlags = longint;
-  ImGuiSetCond = longint;
   ImGuiInputTextFlags = longint;
   ImGuiSelectableFlags = longint;
 
   { Enums }
 
-  ImGuiTreeNodeFlags = (
-      Selected = 1 shl 0,
-      Framed = 1 shl 1,
-      AllowOverlapMode = 1 shl 2,
-      NoTreePushOnOpen = 1 shl 3,
-      NoAutoOpenOnLog = 1 shl 4,
-      DefaultOpen = 1 shl 5,
-      OpenOnDoubleClick = 1 shl 6,
-      OpenOnArrow = 1 shl 7,
-      Leaf = 1 shl 8,
-      Bullet = 1 shl 9
+  ImGuiWindowFlags = longint;
+  ImGuiWindowFlagsEnum = (
+      ImGuiWindowFlags_Default = 0,                        // Default: 0
+      ImGuiWindowFlags_NoTitleBar             = 1 shl 0,   // Disable title-bar
+      ImGuiWindowFlags_NoResize               = 1 shl 1,   // Disable user resizing with the lower-right grip
+      ImGuiWindowFlags_NoMove                 = 1 shl 2,   // Disable user moving the window
+      ImGuiWindowFlags_NoScrollbar            = 1 shl 3,   // Disable scrollbars (window can still scroll with mouse or programatically)
+      ImGuiWindowFlags_NoScrollWithMouse      = 1 shl 4,   // Disable user vertically scrolling with mouse wheel
+      ImGuiWindowFlags_NoCollapse             = 1 shl 5,   // Disable user collapsing window by double-clicking on it
+      ImGuiWindowFlags_AlwaysAutoResize       = 1 shl 6,   // Resize every window to its content every frame
+      ImGuiWindowFlags_ShowBorders            = 1 shl 7,   // Show borders around windows and items
+      ImGuiWindowFlags_NoSavedSettings        = 1 shl 8,   // Never load/save settings in .ini file
+      ImGuiWindowFlags_NoInputs               = 1 shl 9,   // Disable catching mouse or keyboard inputs
+      ImGuiWindowFlags_MenuBar                = 1 shl 10,  // Has a menu-bar
+      ImGuiWindowFlags_HorizontalScrollbar    = 1 shl 11,  // Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(ImVec2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
+      ImGuiWindowFlags_NoFocusOnAppearing     = 1 shl 12,  // Disable taking focus when transitioning from hidden to visible state
+      ImGuiWindowFlags_NoBringToFrontOnFocus  = 1 shl 13,  // Disable bringing window to front when taking focus (e.g. clicking on it or programatically giving it focus)
+      ImGuiWindowFlags_AlwaysVerticalScrollbar= 1 shl 14,  // Always show vertical scrollbar (even if ContentSize.y < Size.y)
+      ImGuiWindowFlags_AlwaysHorizontalScrollbar=1shl 15,  // Always show horizontal scrollbar (even if ContentSize.x < Size.x)
+      ImGuiWindowFlags_AlwaysUseWindowPadding = 1 shl 16   // Ensure child windows without border uses style.WindowPadding (ignored by default for non-bordered child windows, because more convenient)
+  );
+
+  // Condition flags for ImGui::SetWindow***(), SetNextWindow***(), SetNextTreeNode***() functions
+  // All those functions treat 0 as a shortcut to ImGuiSetCond_Always
+  ImGuiSetCond = longint;
+  ImGuiSetCondEnum = (
+      ImGuiSetCond_Always        = 1 shl 0, // Set the variable
+      ImGuiSetCond_Once          = 1 shl 1, // Set the variable once per runtime session (only the first call with succeed)
+      ImGuiSetCond_FirstUseEver  = 1 shl 2, // Set the variable if the window has no saved data (if doesn't exist in the .ini file)
+      ImGuiSetCond_Appearing     = 1 shl 3  // Set the variable if the window is appearing after being hidden/inactive (or the first time)
+  );
+
+  // Flags for ImGui::TreeNodeEx(), ImGui::CollapsingHeader*()
+  ImGuiTreeNodeFlags = longint;
+  ImGuiTreeNodeFlagsEnum = (
+      ImGuiTreeNodeFlags_Selected = 1 shl 0,
+      ImGuiTreeNodeFlags_Framed = 1 shl 1,
+      ImGuiTreeNodeFlags_AllowOverlapMode = 1 shl 2,
+      ImGuiTreeNodeFlags_NoTreePushOnOpen = 1 shl 3,
+      ImGuiTreeNodeFlags_NoAutoOpenOnLog = 1 shl 4,
+      ImGuiTreeNodeFlags_CollapsingHeader = (1 shl 1) or (1 shl 4), //Framed or NoAutoOpenOnLog
+      ImGuiTreeNodeFlags_DefaultOpen = 1 shl 5,
+      ImGuiTreeNodeFlags_OpenOnDoubleClick = 1 shl 6,
+      ImGuiTreeNodeFlags_OpenOnArrow = 1 shl 7,
+      ImGuiTreeNodeFlags_Leaf = 1 shl 8,
+      ImGuiTreeNodeFlags_Bullet = 1 shl 9
   );
 
   ImGuiKey_ = (
@@ -149,6 +175,7 @@ type
   );
 
   { Structs }
+
   ImGuiStyle = record
       Alpha : single;
       WindowPadding : ImVec2;
@@ -177,6 +204,14 @@ type
   end;
   PImGuiStyle = ^ImGuiStyle;
 
+  //forward decls for ImGuiIO
+  PImDrawData = ^ImDrawData;
+  PImFont = ^ImFont;
+  PImFontAtlas = ^ImFontAtlas;
+  PImFontConfig = ^ImFontConfig;
+  PImGuiSizeConstraintCallbackData = ^ImGuiSizeConstraintCallbackData;
+  PImGuiStorage = ^ImGuiStorage;
+  PImGuiTextEditCallbackData = ^ImGuiTextEditCallbackData;
   ImGuiIO = record
       DisplaySize : ImVec2;
       DeltaTime : single;
@@ -273,26 +308,32 @@ type
   end;
 
   ImGuiTextEditCallbackData = record
+      //not translated
   end;
   ImGuiSizeConstraintCallbackData = record
+      //not translated
   end;
   ImGuiStorage = record
+      //not translated
   end;
   ImFont = record
+      //not translated
   end;
   ImFontConfig = record
+      //not translated
   end;
   ImFontAtlas = record
+      //not translated
   end;
-
 
   ImGuiTextEditCallback = function(Data: PImGuiTextEditCallbackData): longint; cdecl;
   ImGuiSizeConstraintCallback = procedure(Data: PImGuiSizeConstraintCallbackData); cdecl;
 
+//binding helpers
+type
   TCol3 = array[0..2] of single;  //todo : does this work?
   TCol4 = array[0..3] of single;
 
-//binding helpers
 function ImVec2Init(const x, y: single): Imvec2; inline;
 
 { Static ImGui class, wraps external cimgui dll calls
@@ -558,8 +599,8 @@ public
   class procedure TreeAdvanceToLabelPos;  inline;
   class function  GetTreeNodeToLabelSpacing: single;  inline;
   class procedure SetNextTreeNodeOpen(opened: bool; cond: ImGuiSetCond = 0);  inline;
-  class function  CollapsingHeader(_label: PChar; flags: ImGuiTreeNodeFlags): bool;  inline;
-  class function  CollapsingHeaderEx(_label: PChar; p_open: Pbool; flags: ImGuiTreeNodeFlags): bool;  inline;
+  class function  CollapsingHeader(_label: PChar; flags: ImGuiTreeNodeFlags = 0): bool;  inline;
+  class function  CollapsingHeader(_label: PChar; p_open: Pbool; flags: ImGuiTreeNodeFlags = 0): bool;  inline;
 
   { Widgets: Selectable / Lists }
   class function  Selectable(_label: string; selected: bool; flags: ImGuiSelectableFlags; size: ImVec2): bool;
@@ -594,10 +635,10 @@ public
   class procedure EndMainMenuBar;  inline;
   class function  BeginMenuBar: bool;  inline;
   class procedure EndMenuBar;  inline;
-  class function  BeginMenu(_label: PChar; Enabled: bool): bool;  inline;
+  class function  BeginMenu(_label: PChar; Enabled: bool = true): bool;  inline;
   class procedure EndMenu;  inline;
-  class function  MenuItem(_label: PChar; shortcut: PChar; selected: bool; Enabled: bool): bool;  inline;
-  class function  MenuItemPtr(_label: PChar; shortcut: PChar; p_selected: Pbool; Enabled: bool): bool;  inline;
+  class function  MenuItem(_label: PChar; shortcut: PChar; selected: bool; Enabled: bool = true): bool;  inline;
+  class function  MenuItem(_label: PChar; shortcut: PChar; p_selected: Pbool; Enabled: bool = true): bool;  inline;
 
   { Popup }
   class procedure OpenPopup(str_id: PChar);  inline;
@@ -1075,6 +1116,8 @@ procedure igSetClipboardText(Text: PChar); cdecl; external ImguiLibName;
 
 { Internal state access - if you want to share ImGui state between modules (e.g. DLL) or allocate it yourself }
 function  igGetVersion(): PChar; cdecl; external ImguiLibName;
+function  igGetCurrentContext(): PImGuiContext; cdecl; external ImguiLibName;
+procedure igSetCurrentContext(ctx: PImGuiContext); cdecl; external ImguiLibName;
 
 procedure ImFontConfig_DefaultConstructor(config: PImFontConfig); cdecl; external ImguiLibName;
 
@@ -1598,7 +1641,7 @@ class procedure ImGui.SetNextTreeNodeOpen(opened: bool; cond: ImGuiSetCond = 0);
     begin igSetNextTreeNodeOpen(opened, cond) end;
 class function ImGui.CollapsingHeader(_label: PChar; flags: ImGuiTreeNodeFlags): bool;
     begin result := igCollapsingHeader(_label, flags) end;
-class function ImGui.CollapsingHeaderEx(_label: PChar; p_open: Pbool; flags: ImGuiTreeNodeFlags): bool;
+class function ImGui.CollapsingHeader(_label: PChar; p_open: Pbool; flags: ImGuiTreeNodeFlags): bool;
     begin result := igCollapsingHeaderEx(_label, p_open, flags) end;
 
 { Widgets: Selectable / Lists }
@@ -1656,7 +1699,7 @@ class procedure ImGui.EndMenu;
     begin igEndMenu end;
 class function ImGui.MenuItem(_label: PChar; shortcut: PChar; selected: bool; Enabled: bool): bool;
     begin result := igMenuItem(_label, shortcut, selected, Enabled) end;
-class function ImGui.MenuItemPtr(_label: PChar; shortcut: PChar; p_selected: Pbool; Enabled: bool): bool;
+class function ImGui.MenuItem(_label: PChar; shortcut: PChar; p_selected: Pbool; Enabled: bool): bool;
     begin result := igMenuItemPtr(_label, shortcut, p_selected, Enabled) end;
 
 { Popup }
