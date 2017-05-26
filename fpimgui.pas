@@ -174,6 +174,25 @@ type
       //ImGuiCol_COUNT  - unnecessary
   );
 
+
+  // Enumeration for PushStyleVar() / PopStyleVar()
+  // NB: the enum only refers to fields of ImGuiStyle() which makes sense to be pushed/poped in UI code. Feel free to add others.
+  ImGuiStyleVar_ = (
+      ImGuiStyleVar_Alpha,               // float
+      ImGuiStyleVar_WindowPadding,       // ImVec2
+      ImGuiStyleVar_WindowRounding,      // float
+      ImGuiStyleVar_WindowMinSize,       // ImVec2
+      ImGuiStyleVar_ChildWindowRounding, // float
+      ImGuiStyleVar_FramePadding,        // ImVec2
+      ImGuiStyleVar_FrameRounding,       // float
+      ImGuiStyleVar_ItemSpacing,         // ImVec2
+      ImGuiStyleVar_ItemInnerSpacing,    // ImVec2
+      ImGuiStyleVar_IndentSpacing,       // float
+      ImGuiStyleVar_GrabMinSize,         // float
+      ImGuiStyleVar_ButtonTextAlign      // flags ImGuiAlign_*
+      //ImGuiStyleVar_Count_ - unnecessary
+  );
+
   { Structs }
 
   ImGuiStyle = record
@@ -335,6 +354,7 @@ type
   TCol4 = array[0..3] of single;
 
 function ImVec2Init(const x, y: single): Imvec2; inline;
+function ImIDPtr(const i: integer): pointer; inline;
 
 { Static ImGui class, wraps external cimgui dll calls
 Used for:
@@ -411,10 +431,10 @@ public
   class procedure PushFont(font: PImFont);  inline;
   class procedure PopFont;  inline;
   class procedure PushStyleColor(idx: ImGuiCol; col: ImVec4);  inline;
-  class procedure PopStyleColor(Count: longint);  inline;
+  class procedure PopStyleColor(count: longint);  inline;
   class procedure PushStyleVar(idx: ImGuiStyleVar; val: single);  inline;
   class procedure PushStyleVarVec(idx: ImGuiStyleVar; val: ImVec2);  inline;
-  class procedure PopStyleVar(Count: longint);  inline;
+  class procedure PopStyleVar(count: longint = 1);  inline;
   class function  GetFont(): PImFont;  inline;
   class function  GetFontSize: single;  inline;
   class procedure GetFontTexUvWhitePixel(pOut: PImVec2);  inline;
@@ -478,7 +498,6 @@ public
   class function  GetIdPtr(ptr_id: pointer): ImGuiID;  inline;
 
   { Widgets }
-  { Text() wraps TextUnformatted(), not Text() - formatting is done by pascal's Format }
   class procedure Text(const text_: string);
   class procedure Text(const Fmt: string; const Args: array of Const);
   //procedure igTextV(fmt:Pchar; args:va_list);cdecl;external ImguiLibName;
@@ -575,20 +594,17 @@ public
   class function  InputInt4(_label: PChar; v: TLongInt4; extra_flags: ImGuiInputTextFlags): bool;  inline;
 
   { Widgets: Trees }
-  class function  TreeNode(_label: PChar): bool;  inline;
-  class function  TreeNodeStr(str_id: PChar; fmt: string; args: array of const): bool; {inline;}
-  class function  TreeNodeStr(str_id: PChar; fmt: string): bool;  inline;
-  class function  TreeNodePtr(ptr_id: pointer; fmt: string; args: array of const): bool; {inline;}
-  class function  TreeNodePtr(ptr_id: pointer; fmt: string): bool;  inline;
-  //todo : vargs
-  //    function  igTreeNodeStrV(str_id:Pchar; fmt:Pchar; args:va_list):bool;cdecl;external ImguiLibName;
-  //todo : vargs
-  //    function  igTreeNodePtrV(ptr_id:pointer; fmt:Pchar; args:va_list):bool;cdecl;external ImguiLibName;
+  class function  TreeNode(_label: string): bool;   inline;
+  class function  TreeNode(str_id: string; fmt: string; args: array of const): bool; {inline;}
+  class function  TreeNode(str_id: string; fmt: string): bool;  inline;
+  class function  TreeNode(ptr_id: pointer; fmt: string; args: array of const): bool; {inline;}
+  class function  TreeNode(ptr_id: pointer; fmt: string): bool;  inline;
+
   class function  TreeNodeEx(_label: PChar; flags: ImGuiTreeNodeFlags): bool;  inline;
-  class function  TreeNodeExStr(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool; {inline;}
-  class function  TreeNodeExStr(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string): bool;  inline;
-  class function  TreeNodeExPtr(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool; {inline;}
-  class function  TreeNodeExPtr(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string): bool;  inline;
+  class function  TreeNodeEx(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool; {inline;}
+  class function  TreeNodeEx(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string): bool;  inline;
+  class function  TreeNodeEx(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool; {inline;}
+  class function  TreeNodeEx(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string): bool;  inline;
   //todo : vargs
   //    function  igTreeNodeExV(str_id:Pchar; flags:ImGuiTreeNodeFlags; fmt:Pchar; args:va_list):bool;cdecl;external ImguiLibName;
   //todo : vargs
@@ -667,7 +683,7 @@ public
   class function  IsItemHovered: bool;  inline;
   class function  IsItemHoveredRect: bool;  inline;
   class function  IsItemActive: bool;  inline;
-  class function  IsItemClicked(mouse_button: longint): bool;  inline;
+  class function  IsItemClicked(mouse_button: longint = 0): bool;  inline;
   class function  IsItemVisible: bool;  inline;
   class function  IsAnyItemHovered: bool;  inline;
   class function  IsAnyItemActive: bool;  inline;
@@ -1224,6 +1240,12 @@ begin
   result.y := y;
 end;
 
+//Replacement for (void*)(intptr_t) int cast, used for IDs. Generates warnings
+function ImIDPtr(const i: integer): pointer;
+begin
+  result := pointer( IntPtr(i) )
+end;
+
 { ImGui
   Keep functions short, they're mostly just wrappers. Inlining begin/end with trivial function body is ok
 }
@@ -1345,8 +1367,8 @@ class procedure ImGui.PushStyleVar(idx: ImGuiStyleVar; val: single);
     begin igPushStyleVar(idx, val) end;
 class procedure ImGui.PushStyleVarVec(idx: ImGuiStyleVar; val: ImVec2);
     begin igPushStyleVarVec(idx, val) end;
-class procedure ImGui.PopStyleVar(Count: longint);
-    begin igPopStyleVar(Count) end;
+class procedure ImGui.PopStyleVar(count: longint);
+    begin igPopStyleVar(count) end;
 class function ImGui.GetFont(): PImFont;
     begin result := igGetFont end;
 class function ImGui.GetFontSize: single;
@@ -1462,9 +1484,9 @@ class function ImGui.GetIdPtr(ptr_id: pointer): ImGuiID;
 
 { Widgets }
 class procedure ImGui.Text(const text_: string);
-    begin TextUnformatted(text_) end;
+    begin igText(Pchar(text_)) end;
 class procedure ImGui.Text(const Fmt: string; const Args: array of const);
-    begin TextUnformatted(Format(fmt, args)) end;
+    begin Text(Format(fmt, args)) end;
 class procedure ImGui.TextColored(col: ImVec4; fmt: PChar; args: array of const);
     begin TextColored(col, Format(fmt, args)) end;
 class procedure ImGui.TextColored(col: ImVec4; const fmt: string);
@@ -1607,25 +1629,26 @@ class function ImGui.InputInt4(_label: PChar; v: TLongInt4; extra_flags: ImGuiIn
     begin result := igInputInt4(_label, v, extra_flags) end;
 
 { Widgets: Trees }
-class function ImGui.TreeNode(_label: PChar): bool;
-    begin result := igTreeNode(_label) end;
-class function ImGui.TreeNodeStr(str_id: PChar; fmt: string; args: array of const): bool;
-    begin result := TreeNodeStr(str_id, Format(fmt, args)) end;
-class function ImGui.TreeNodeStr(str_id: PChar; fmt: string): bool;
-    begin result := igTreeNodeStr(str_id, pchar(fmt)) end;
-class function ImGui.TreeNodePtr(ptr_id: pointer; fmt: string; args: array of const): bool;
-    begin result := TreeNodePtr(ptr_id, Format(fmt, args)) end;
-class function ImGui.TreeNodePtr(ptr_id: pointer; fmt: string): bool;
+class function ImGui.TreeNode(_label: string): bool;
+    begin result := igTreeNode(pchar(_label)) end;
+class function ImGui.TreeNode(str_id: string; fmt: string; args: array of const): bool;
+    begin result := TreeNode(str_id, Format(fmt, args)) end;
+class function ImGui.TreeNode(str_id: string; fmt: string): bool;
+    begin result := igTreeNodeStr(pchar(str_id), pchar(fmt)) end;
+class function ImGui.TreeNode(ptr_id: pointer; fmt: string; args: array of const): bool;
+    begin result := TreeNode(ptr_id, Format(fmt, args)) end;
+class function ImGui.TreeNode(ptr_id: pointer; fmt: string): bool;
     begin result := igTreeNodePtr(ptr_id, pchar(fmt)) end;
+
 class function ImGui.TreeNodeEx(_label: PChar; flags: ImGuiTreeNodeFlags): bool;
     begin result := igTreeNodeEx(_label, flags) end;
-class function ImGui.TreeNodeExStr(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool;
-    begin result := TreeNodeExStr(str_id, flags, Format(fmt, args)) end;
-class function ImGui.TreeNodeExStr(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string): bool;
+class function ImGui.TreeNodeEx(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool;
+    begin result := TreeNodeEx(str_id, flags, Format(fmt, args)) end;
+class function ImGui.TreeNodeEx(str_id: PChar; flags: ImGuiTreeNodeFlags; fmt: string): bool;
     begin result := igTreeNodeExStr(str_id, flags, pchar(fmt)) end;
-class function ImGui.TreeNodeExPtr(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool;
-    begin result := TreeNodeExPtr(ptr_id, flags, Format(fmt, args)) end;
-class function ImGui.TreeNodeExPtr(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string): bool;
+class function ImGui.TreeNodeEx(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string; args: array of const): bool;
+    begin result := TreeNodeEx(ptr_id, flags, Format(fmt, args)) end;
+class function ImGui.TreeNodeEx(ptr_id: pointer; flags: ImGuiTreeNodeFlags; fmt: string): bool;
     begin result := igTreeNodeExPtr(ptr_id, flags, pchar(fmt)) end;
 class procedure ImGui.TreePushStr(str_id: PChar);
     begin igTreePushStr(str_id) end;
