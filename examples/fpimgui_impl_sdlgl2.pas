@@ -142,7 +142,7 @@ begin
   io^.RenderDrawListsFn := @Imgui_ImplSdlGL2_RenderDrawLists;
   io^.SetClipboardTextFn := nil;
   io^.GetClipboardTextFn := nil;
-  io^.ClipboardUserData := nil;
+  //TODO 1.50 io^.ClipboardUserData := nil;
 end;
 
 procedure ImGui_ImplSdlGL2_Shutdown();

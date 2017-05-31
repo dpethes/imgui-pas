@@ -244,22 +244,33 @@ type
       KeyRepeatDelay : single;
       KeyRepeatRate : single;
       UserData : pointer;
+
       Fonts : PImFontAtlas;
       FontGlobalScale : single;
       FontAllowUserScaling : bool;
-      FontDefault : PImFont;
+      //TODO 1.50 FontDefault : PImFont;
       DisplayFramebufferScale : ImVec2;
       DisplayVisibleMin : ImVec2;
       DisplayVisibleMax : ImVec2;
-      OSXBehaviors : bool;
+
+      // Advanced/subtle behaviors
+      WordMovementUsesAltKey: bool;
+      ShortcutsUseSuperKey: bool;
+      DoubleClickSelectsWord: bool;
+      MultiSelectUsesSuperKey: bool;
+      //TODO 1.50 OSXBehaviors : bool;
+
+      // User Functions
       RenderDrawListsFn : procedure (data:PImDrawData);cdecl;
       GetClipboardTextFn : function (user_data:pointer):Pchar;cdecl;
       SetClipboardTextFn : procedure (user_data:pointer; text:Pchar);cdecl;
-      ClipboardUserData : pointer;
+      //TODO 1.50 ClipboardUserData : pointer;
       MemAllocFn : function (sz:size_t):pointer;cdecl;
       MemFreeFn : procedure (ptr:pointer);cdecl;
       ImeSetInputScreenPosFn : procedure (x:longint; y:longint);cdecl;
       ImeWindowHandle : pointer;
+
+      // Input - Fill before calling NewFrame()
       MousePos : ImVec2;
       MouseDown : array[0..4] of bool;
       MouseWheel : single;
@@ -269,7 +280,9 @@ type
       KeyAlt : bool;
       KeySuper : bool;
       KeysDown : array[0..511] of bool;
-      InputCharacters : array[0..(16+1)-1] of ImWchar;
+      InputCharacters : array[0..16] of ImWchar;
+
+      // Output - Retrieve after calling NewFrame()
       WantCaptureMouse : bool;
       WantCaptureKeyboard : bool;
       WantTextInput : bool;
@@ -278,7 +291,12 @@ type
       MetricsRenderVertices : longint;
       MetricsRenderIndices : longint;
       MetricsActiveWindows : longint;
+
+      MousePosPrev : ImVec2;  //TODO 1.50 swap with MouseDelta and move to private
       MouseDelta : ImVec2;
+
+      // [Private] ImGui will maintain those fields. Forward compatibility not guaranteed!
+      // skipped
   end;
   PImGuiIO = ^ImGuiIO;
 
