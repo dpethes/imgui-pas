@@ -34,6 +34,8 @@ begin
 end;
 
 begin
+  SDL_SetHint(SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, '1');  //prevent SDL from raising a debugger exception to name threads
+
   //open new SDL window with OpenGL rendering support
   SDL_Init(SDL_INIT_VIDEO or SDL_INIT_TIMER);
   disp := TDisplay.Create;
