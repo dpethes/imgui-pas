@@ -13,6 +13,7 @@ Current version is for cimgui's commit 2195a6f (based on [ImGui 1.50](https://gi
 
 Copy sources and cimgui binary to your project folder. See the examples for how to integrate it with your rendering pipeline and the "getting started" section in imgui.cpp.
 There's also a very basic demo program that draws some ImGui windows in a SDL2 window with OpenGL context.
+It includes pre-build versions of cimgui, if you don't want to build it on your own.
 
 ## Issues/Todo
 * translate more structs, enums
