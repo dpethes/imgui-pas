@@ -240,7 +240,7 @@ begin
 
       if ImGui.TreeNode('Style') then
       begin
-          //ImGui.ShowStyleEditor();  //DP: todo
+          ImGui.ShowStyleEditor(Imgui.GetStyle());  //this is useful to have, but doesn't need to be translated as an example
           ImGui.TreePop();
       end;
 
