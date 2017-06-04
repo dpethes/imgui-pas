@@ -204,7 +204,7 @@ begin
     g_MouseWheel := 0.0;
 
     // Hide OS mouse cursor if ImGui is drawing it
-    //SDL_ShowCursor(io.MouseDrawCursor ? 0 : 1);
+    if io^.MouseDrawCursor then SDL_ShowCursor(SDL_DISABLE) else SDL_ShowCursor(SDL_ENABLE);
 
     // Start the frame
     igNewFrame();
