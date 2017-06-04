@@ -110,6 +110,15 @@ begin
   end;
 end;
 
+function ImGui_MemAlloc(sz:size_t): pointer; cdecl;
+begin
+  result := Getmem(sz);
+end;
+
+procedure ImGui_MemFree(ptr:pointer); cdecl;
+begin
+  Freemem(ptr);
+end;
 
 procedure ImGui_ImplSdlGL2_Init();
 var
@@ -142,7 +151,12 @@ begin
   io^.RenderDrawListsFn := @Imgui_ImplSdlGL2_RenderDrawLists;
   io^.SetClipboardTextFn := nil;
   io^.GetClipboardTextFn := nil;
-  //TODO 1.50 io^.ClipboardUserData := nil;
+  io^.ClipboardUserData := nil;
+
+  // Allocate memory through pascal's memory allocator.
+  // This is optional, for example for seeing the number of memory allocations through HeapTrc
+  io^.MemAllocFn := @ImGui_MemAlloc;
+  io^.MemFreeFn :=  @ImGui_MemFree;
 end;
 
 procedure ImGui_ImplSdlGL2_Shutdown();
