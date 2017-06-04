@@ -585,6 +585,7 @@ unit SDL2;
 {$IFDEF FPC}
   {$H+}
   {$PACKRECORDS C}        // Added for record
+  {$PACKENUM DEFAULT}     // Added for c-like enumerators
   {$MACRO ON}             // Added For OpenGL
   {$DEFINE Delphi}
   {$DEFINE UseAT}
@@ -663,17 +664,13 @@ interface
       Windows;
   {$ENDIF}
 
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
     uses
+      {$IFDEF DARWIN}
+      CocoaAll,
+      {$ENDIF}
       X,
       XLib;
-  {$ENDIF}
-  
-  {$IFDEF DARWIN}
-    uses
-      X,
-      XLib,
-      CocoaAll;
   {$ENDIF}
 
 const
@@ -2030,15 +2027,15 @@ function SDL_PointInRect(const p: PSDL_Point; const r: PSDL_Rect): Boolean; Inli
    *  Returns true if the rectangle has no area.
    *}
 
-  //changed from variant(bďż˝ďż˝ďż˝ďż˝ďż˝h!) to TSDL_Rect
+  //changed from variant(bï¿½ï¿½ï¿½ï¿½ï¿½h!) to TSDL_Rect
   //maybe PSDL_Rect?
-function SDL_RectEmpty(X: TSDL_Rect): Boolean;
+function SDL_RectEmpty(const r: PSDL_Rect): Boolean; inline;
 
     {**
      *  Returns true if the two rectangles are equal.
      *}
 
-function SDL_RectEquals(A: TSDL_Rect; B: TSDL_Rect): Boolean;
+function SDL_RectEquals(const a, b: PSDL_Rect): Boolean; inline;
 
   {**
    *  Determine whether two rectangles intersect.
@@ -2046,7 +2043,7 @@ function SDL_RectEquals(A: TSDL_Rect; B: TSDL_Rect): Boolean;
    *  SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
    *}
 
-function SDL_HasIntersection(const A: PSDL_Rect; const B: PSDL_Rect): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_HasIntersection' {$ENDIF} {$ENDIF};
+function SDL_HasIntersection(const a, b: PSDL_Rect): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_HasIntersection' {$ENDIF} {$ENDIF};
 
   {**
    *  Calculate the intersection of two rectangles.
@@ -2054,13 +2051,13 @@ function SDL_HasIntersection(const A: PSDL_Rect; const B: PSDL_Rect): TSDL_Bool 
    *  SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
    *}
 
-function SDL_IntersectRect(const A: PSDL_Rect; const B: PSDL_Rect; result: PSDL_Rect): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_IntersectRect' {$ENDIF} {$ENDIF};
+function SDL_IntersectRect(const A, B: PSDL_Rect; result: PSDL_Rect): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_IntersectRect' {$ENDIF} {$ENDIF};
 
   {**
    *  Calculate the union of two rectangles.
    *}
 
-procedure SDL_UnionRect(const A: PSDL_Rect; const B: PSDL_Rect; result: PSDL_Rect) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_UnionRect' {$ENDIF} {$ENDIF};
+procedure SDL_UnionRect(const A, B: PSDL_Rect; result: PSDL_Rect) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_UnionRect' {$ENDIF} {$ENDIF};
 
   {**
    *  Calculate a minimal rectangle enclosing a set of points
@@ -2076,7 +2073,7 @@ function SDL_EnclosePoints(const points: PSDL_Point; count: SInt32; const clip: 
    *  SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
    *}
 
-function SDL_IntersectRectAndLine(const rect: PSDL_Rect; X1: PInt; Y1: PInt; X2: PInt; Y2: PInt): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_IntersectRectAndLine' {$ENDIF} {$ENDIF};
+function SDL_IntersectRectAndLine(const rect: PSDL_Rect; X1, Y1, X2, Y2: PInt): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_IntersectRectAndLine' {$ENDIF} {$ENDIF};
 
 { included sdlrwops.inc}
 //from "sdl_rwops"
@@ -4583,8 +4580,9 @@ function SDL_GL_GetCurrentContext: TSDL_GLContext cdecl; external SDL_LibName {$
    *  SDL_GetWindowSize()
    *  SDL_CreateWindow()
    *}
-
+   
 procedure SDL_GL_GetDrawableSize(window: PSDL_Window; w: PInt; h: PInt); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GL_GetDrawableSize' {$ENDIF} {$ENDIF};
+
   {**
    *  Set the swap interval for the current OpenGL context.
    *  
@@ -4672,8 +4670,9 @@ procedure SDL_GL_DeleteContext(context: TSDL_GLContext) cdecl; external SDL_LibN
  */
 }
 
+const
 
-(**
+{/**
  *  \brief  A variable controlling how 3D acceleration is used to accelerate the SDL screen surface.
  *
  *  SDL can try to accelerate the SDL screen surface by using streaming
@@ -4687,8 +4686,7 @@ procedure SDL_GL_DeleteContext(context: TSDL_GLContext) cdecl; external SDL_LibN
  *
  *  By default SDL tries to make a best guess for each platform whether
  *  to use acceleration or not.
- *)
-const
+ */}
 SDL_HINT_FRAMEBUFFER_ACCELERATION  = 'SDL_FRAMEBUFFER_ACCELERATION';
 
 {/**
@@ -4721,29 +4719,29 @@ SDL_HINT_RENDER_DRIVER = 'SDL_RENDER_DRIVER';
  */}
 SDL_HINT_RENDER_OPENGL_SHADERS = 'SDL_RENDER_OPENGL_SHADERS';
 
-  {**
-   *  \brief  A variable controlling whether the Direct3D device is initialized for thread-safe operations.
-   *
-   *  This variable can be set to the following values:
-   *    "0"       - Thread-safety is not enabled (faster)
-   *    "1"       - Thread-safety is enabled
-   *
-   *  By default the Direct3D device is created with thread-safety disabled.
-   *}
+{/**
+ *  \brief  A variable controlling whether the Direct3D device is initialized for thread-safe operations.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Thread-safety is not enabled (faster)
+ *    "1"       - Thread-safety is enabled
+ *
+ *  By default the Direct3D device is created with thread-safety disabled.
+ */}
 SDL_HINT_RENDER_DIRECT3D_THREADSAFE = 'SDL_RENDER_DIRECT3D_THREADSAFE';
 
-  {**
-   *  \brief  A variable controlling whether to enable Direct3D 11+'s Debug Layer.
-   *
-   *  This variable does not have any effect on the Direct3D 9 based renderer.
-   *
-   *  This variable can be set to the following values:
-   *    "0"       - Disable Debug Layer use
-   *    "1"       - Enable Debug Layer use
-   *
-   *  By default, SDL does not use Direct3D Debug Layer.
-   *}
-SDL_HINT_RENDER_DIRECT3D11_DEBUG = 'SDL_HINT_RENDER_DIRECT3D11_DEBUG';
+{/**
+ *  \brief  A variable controlling whether to enable Direct3D 11+'s Debug Layer.
+ *
+ *  This variable does not have any effect on the Direct3D 9 based renderer.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Disable Debug Layer use
+ *    "1"       - Enable Debug Layer use
+ *
+ *  By default, SDL does not use Direct3D Debug Layer.
+ */}
+SDL_HINT_RENDER_DIRECT3D11_DEBUG = 'SDL_RENDER_DIRECT3D11_DEBUG';
 
 {/**
  *  \brief  A variable controlling the scaling quality
@@ -4813,6 +4811,42 @@ SDL_HINT_VIDEO_X11_XINERAMA = 'SDL_VIDEO_X11_XINERAMA';
 SDL_HINT_VIDEO_X11_XRANDR = 'SDL_VIDEO_X11_XRANDR';
 
 {/**
+ *  \brief  A variable controlling whether the X11 _NET_WM_PING protocol should be supported.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Disable _NET_WM_PING
+ *    "1"       - Enable _NET_WM_PING
+ *
+ *  By default SDL will use _NET_WM_PING, but for applications that know they
+ *  will not always be able to respond to ping requests in a timely manner they can
+ *  turn it off to avoid the window manager thinking the app is hung.
+ *  The hint is checked in CreateWindow.
+ */}
+SDL_HINT_VIDEO_X11_NET_WM_PING = 'SDL_VIDEO_X11_NET_WM_PING';
+
+{/**
+ *  \brief  A variable controlling whether the window frame and title bar are interactive when the cursor is hidden 
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - The window frame is not interactive when the cursor is hidden (no move, resize, etc)
+ *    "1"       - The window frame is interactive when the cursor is hidden
+ *
+ *  By default SDL will allow interaction with the window frame when the cursor is hidden
+ */}
+SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN = 'SDL_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN';
+
+{/**
+ *  \brief  A variable controlling whether the windows message loop is processed by SDL 
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - The window message loop is not run
+ *    "1"       - The window message loop is processed in SDL_PumpEvents()
+ *
+ *  By default SDL will process the windows message loop
+ */}
+SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP = 'SDL_WINDOWS_ENABLE_MESSAGELOOP';
+
+{/**
  *  \brief  A variable controlling whether grabbing input grabs the keyboard
  *
  *  This variable can be set to the following values:
@@ -4835,11 +4869,21 @@ SDL_HINT_GRAB_KEYBOARD = 'SDL_GRAB_KEYBOARD';
 SDL_HINT_MOUSE_RELATIVE_MODE_WARP = 'SDL_MOUSE_RELATIVE_MODE_WARP';
 
 {/**
+ *  \brief Allow mouse click events when clicking to focus an SDL window
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Ignore mouse clicks that activate a window
+ *    "1"       - Generate events for mouse clicks that activate a window
+ *
+ *  By default SDL will ignore mouse clicks that activate a window
+ */}
+SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH = 'SDL_MOUSE_FOCUS_CLICKTHROUGH';
+
+{/**
  *  \brief Minimize your SDL_Window if it loses key focus when in Fullscreen mode. Defaults to true.
  *
  */}
 SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS = 'SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS';
-
 
 {/**
  *  \brief  A variable controlling whether the idle timer is disabled on iOS.
@@ -4848,6 +4892,9 @@ SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS = 'SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS';
  *  dimmed automatically. For games where the accelerometer is the only input
  *  this is problematic. This functionality can be disabled by setting this
  *  hint.
+ *
+ *  As of SDL 2.0.4, SDL_EnableScreenSaver() and SDL_DisableScreenSaver()
+ *  accomplish the same thing on iOS. They should be preferred over this hint.
  *
  *  This variable can be set to the following values:
  *    "0"       - Enable idle timer
@@ -4867,8 +4914,37 @@ SDL_HINT_IDLE_TIMER_DISABLED = 'SDL_IOS_IDLE_TIMER_DISABLED';
 SDL_HINT_ORIENTATIONS = 'SDL_IOS_ORIENTATIONS';
 
 {/**
- *  \brief  A variable controlling whether an Android built-in accelerometer should be
- *  listed as a joystick device, rather than listing actual joysticks only.
+ *  \brief  A variable controlling whether controllers used with the Apple TV
+ *  generate UI events.
+ *
+ * When UI events are generated by controller input, the app will be
+ * backgrounded when the Apple TV remote's menu button is pressed, and when the
+ * pause or B buttons on gamepads are pressed.
+ *
+ * More information about properly making use of controllers for the Apple TV
+ * can be found here:
+ * https://developer.apple.com/tvos/human-interface-guidelines/remote-and-controllers/
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Controller input does not generate UI events (the default).
+ *    "1"       - Controller input generates UI events.
+ */}
+SDL_HINT_APPLE_TV_CONTROLLER_UI_EVENTS = 'SDL_APPLE_TV_CONTROLLER_UI_EVENTS';
+
+{/**
+ * \brief  A variable controlling whether the Apple TV remote's joystick axes
+ *         will automatically match the rotation of the remote.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Remote orientation does not affect joystick axes (the default).
+ *    "1"       - Joystick axes are based on the orientation of the remote.
+ */}
+SDL_HINT_APPLE_TV_REMOTE_ALLOW_ROTATION = 'SDL_APPLE_TV_REMOTE_ALLOW_ROTATION';
+
+{/**
+ *  \brief  A variable controlling whether the Android / iOS built-in
+ *  accelerometer should be listed as a joystick device, rather than listing
+ *  actual joysticks only.
  *
  *  This variable can be set to the following values:
  *    "0"       - List only real joysticks and accept input from them
@@ -4886,15 +4962,13 @@ SDL_HINT_ACCELEROMETER_AS_JOYSTICK = 'SDL_ACCELEROMETER_AS_JOYSTICK';
 SDL_HINT_XINPUT_ENABLED = 'SDL_XINPUT_ENABLED';
 
 {**
- *  \brief  A hint that specifies that SDL should use the old axis and button mapping for XInput devices. 
- *  
- *  The variable can be set to the following values:
- *    0  use the old axis and button mapping for XInput devices
- *    1  do not use old axis and button mapping for XInput devices
- *  
- *  By default SDL does not use the old axis and button mapping for XInput devices. 
+ *  \brief  A variable that causes SDL to use the old axis and button mapping for XInput devices.
+ *
+ *  This hint is for backwards compatibility only and will be removed in SDL 2.1
+ *
+ *  The default value is "0".  This hint must be set before SDL_Init()
  *}
-SDL_HINT_XINPUT_USE_OLD_JOYSTICK_MAPPING = 'SDL_HINT_XINPUT_USE_OLD_JOYSTICK_MAPPING';
+SDL_HINT_XINPUT_USE_OLD_JOYSTICK_MAPPING = 'SDL_XINPUT_USE_OLD_JOYSTICK_MAPPING';
 
 {/**
  *  \brief  A variable that lets you manually hint extra gamecontroller db entries
@@ -4905,7 +4979,6 @@ SDL_HINT_XINPUT_USE_OLD_JOYSTICK_MAPPING = 'SDL_HINT_XINPUT_USE_OLD_JOYSTICK_MAP
  *  You can update mappings after the system is initialized with SDL_GameControllerMappingForGUID() and SDL_GameControllerAddMapping()
  */}
 SDL_HINT_GAMECONTROLLERCONFIG = 'SDL_GAMECONTROLLERCONFIG';
-
 
 {/**
  *  \brief  A variable that lets you enable joystick (and gamecontroller) events even when your app is in the background.
@@ -4920,7 +4993,6 @@ SDL_HINT_GAMECONTROLLERCONFIG = 'SDL_GAMECONTROLLERCONFIG';
  */}
 SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS = 'SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS';
 
-
 {/**
  *  \brief If set to 0 then never set the top most bit on a SDL Window, even if the video mode expects it.
  *      This is a debugging aid for developers and not expected to be used by end users. The default is "1"
@@ -4930,7 +5002,6 @@ SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS = 'SDL_JOYSTICK_ALLOW_BACKGROUND_EVENT
  *    "1"       - allow topmost
  */}
 SDL_HINT_ALLOW_TOPMOST = 'SDL_ALLOW_TOPMOST';
-
 
 {/**
  *  \brief A variable that controls the timer resolution, in milliseconds.
@@ -4948,29 +5019,30 @@ SDL_HINT_ALLOW_TOPMOST = 'SDL_ALLOW_TOPMOST';
  */}
 SDL_HINT_TIMER_RESOLUTION = 'SDL_TIMER_RESOLUTION';
 
-{**
- *  \brief If set to 1, then do not allow high-DPI windows. ("Retina" on Mac)
- *}
+{/**
+ *  \brief  A string specifying SDL's threads stack size in bytes or "0" for the backend's default size
+ *
+ *  Use this hint in case you need to set SDL's threads stack size to other than the default.
+ *  This is specially useful if you build SDL against a non glibc libc library (such as musl) which
+ *  provides a relatively small default thread stack size (a few kilobytes versus the default 8MB glibc uses).
+ *  Support for this hint is currently available only in the pthread, Windows, and PSP backend.
+ */}
+SDL_HINT_THREAD_STACK_SIZE = 'SDL_THREAD_STACK_SIZE';
+
+{/**
+ *  \brief If set to 1, then do not allow high-DPI windows. ("Retina" on Mac and iOS)
+ */}
 SDL_HINT_VIDEO_HIGHDPI_DISABLED = 'SDL_VIDEO_HIGHDPI_DISABLED';
 
-{**
- *  \brief  A hint that specifies if the SDL app should not be forced to become a foreground process on Mac OS X. 
- *  
- *  Possible values:
- *    0  force the SDL app to become a foreground process (default)
- *    1  do not force the SDL app to become a foreground process
- *}
-SDL_HINT_MAC_BACKGROUND_APP = 'SDL_HINT_MAC_BACKGROUND_APP';
-
-{**
+{/**
  *  \brief A variable that determines whether ctrl+click should generate a right-click event on Mac
- *  
+ *
  *  If present, holding ctrl while left clicking will generate a right click
  *  event when on Mac.
- *}
+ */}
 SDL_HINT_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK = 'SDL_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK';
 
-{**
+{/**
  *  \brief  A variable specifying which shader compiler to preload when using the Chrome ANGLE binaries
  *
  *  SDL has EGL and OpenGL ES2 support on Windows via the ANGLE project. It
@@ -4983,7 +5055,7 @@ SDL_HINT_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK = 'SDL_MAC_CTRL_CLICK_EMULATE_RIGHT_
  *    "d3dcompiler_43.dll" - for XP support.
  *    "none" - do not load any library, useful if you compiled ANGLE from source and included the compiler in your binaries.
  *
- *}
+ */}
 SDL_HINT_VIDEO_WIN_D3DCOMPILER = 'SDL_VIDEO_WIN_D3DCOMPILER';
 
 {/**
@@ -4993,7 +5065,7 @@ SDL_HINT_VIDEO_WIN_D3DCOMPILER = 'SDL_VIDEO_WIN_D3DCOMPILER';
  *  SDL_WINDOW_OPENGL set (and running on WGL only, currently), then two things will occur on the newly 
  *  created SDL_Window:
  *
- *  1. Its pixel format will be set to the same pixel format as this SDL_Window.  This is
+ *   1. Its pixel format will be set to the same pixel format as this SDL_Window.  This is
  *  needed for example when sharing an OpenGL context across multiple windows.
  *
  *  2. The flag SDL_WINDOW_OPENGL will be set on the new window so it can be used for
@@ -5005,190 +5077,218 @@ SDL_HINT_VIDEO_WIN_D3DCOMPILER = 'SDL_VIDEO_WIN_D3DCOMPILER';
  */}
 SDL_HINT_VIDEO_WINDOW_SHARE_PIXEL_FORMAT = 'SDL_VIDEO_WINDOW_SHARE_PIXEL_FORMAT';
 
-  {**
-   *  \brief A URL to a WinRT app's privacy policy
-   *
-   *  All network-enabled WinRT apps must make a privacy policy available to its
-   *  users.  On Windows 8, 8.1, and RT, Microsoft mandates that this policy be
-   *  be available in the Windows Settings charm, as accessed from within the app.
-   *  SDL provides code to add a URL-based link there, which can point to the app's
-   *  privacy policy.
-   *
-   *  To setup a URL to an app's privacy policy, set SDL_HINT_WINRT_PRIVACY_POLICY_URL
-   *  before calling any SDL_Init functions.  The contents of the hint should
-   *  be a valid URL.  For example, "http://www.example.com".
-   *
-   *  The default value is "", which will prevent SDL from adding a privacy policy
-   *  link to the Settings charm.  This hint should only be set during app init.
-   *
-   *  The label text of an app's "Privacy Policy" link may be customized via another
-   *  hint, SDL_HINT_WINRT_PRIVACY_POLICY_LABEL.
-   *
-   *  Please note that on Windows Phone, Microsoft does not provide standard UI
-   *  for displaying a privacy policy link, and as such, SDL_HINT_WINRT_PRIVACY_POLICY_URL
-   *  will not get used on that platform.  Network-enabled phone apps should display
-   *  their privacy policy through some other, in-app means.
-   *}
-SDL_HINT_WINRT_PRIVACY_POLICY_URL = 'SDL_HINT_WINRT_PRIVACY_POLICY_URL';
+{/**
+ *  \brief A URL to a WinRT app's privacy policy
+ *
+ *  All network-enabled WinRT apps must make a privacy policy available to its
+ *  users.  On Windows 8, 8.1, and RT, Microsoft mandates that this policy be
+ *  be available in the Windows Settings charm, as accessed from within the app.
+ *  SDL provides code to add a URL-based link there, which can point to the app's
+ *  privacy policy.
+ *
+ *  To setup a URL to an app's privacy policy, set SDL_HINT_WINRT_PRIVACY_POLICY_URL
+ *  before calling any SDL_Init() functions.  The contents of the hint should
+ *  be a valid URL.  For example, "http://www.example.com".
+ *
+ *  The default value is "", which will prevent SDL from adding a privacy policy
+ *  link to the Settings charm.  This hint should only be set during app init.
+ *
+ *  The label text of an app's "Privacy Policy" link may be customized via another
+ *  hint, SDL_HINT_WINRT_PRIVACY_POLICY_LABEL.
+ *
+ *  Please note that on Windows Phone, Microsoft does not provide standard UI
+ *  for displaying a privacy policy link, and as such, SDL_HINT_WINRT_PRIVACY_POLICY_URL
+ *  will not get used on that platform.  Network-enabled phone apps should display
+ *  their privacy policy through some other, in-app means.
+ */}
+SDL_HINT_WINRT_PRIVACY_POLICY_URL = 'SDL_WINRT_PRIVACY_POLICY_URL';
 
-  {**
-   *  \brief Label text for a WinRT app's privacy policy link
-   *
-   *  Network-enabled WinRT apps must include a privacy policy.  On Windows 8, 8.1, and RT,
-   *  Microsoft mandates that this policy be available via the Windows Settings charm.
-   *  SDL provides code to add a link there, with it's label text being set via the
-   *  optional hint, SDL_HINT_WINRT_PRIVACY_POLICY_LABEL.
-   *
-   *  Please note that a privacy policy's contents are not set via this hint.  A separate
-   *  hint, SDL_HINT_WINRT_PRIVACY_POLICY_URL, is used to link to the actual text of the
-   *  policy.
-   *
-   *  The contents of this hint should be encoded as a UTF8 string.
-   *
-   *  The default value is "Privacy Policy".  This hint should only be set during app
-   *  initialization, preferably before any calls to SDL_Init.
-   *
-   *  For additional information on linking to a privacy policy, see the documentation for
-   *  SDL_HINT_WINRT_PRIVACY_POLICY_URL.
-   *}
-SDL_HINT_WINRT_PRIVACY_POLICY_LABEL = 'SDL_HINT_WINRT_PRIVACY_POLICY_LABEL';
+{/** 
+ *  \brief Label text for a WinRT app's privacy policy link
+ *
+ *  Network-enabled WinRT apps must include a privacy policy.  On Windows 8, 8.1, and RT,
+ *  Microsoft mandates that this policy be available via the Windows Settings charm.
+ *  SDL provides code to add a link there, with its label text being set via the
+ *  optional hint, SDL_HINT_WINRT_PRIVACY_POLICY_LABEL.
+ *
+ *  Please note that a privacy policy's contents are not set via this hint.  A separate
+ *  hint, SDL_HINT_WINRT_PRIVACY_POLICY_URL, is used to link to the actual text of the
+ *  policy.
+ *
+ *  The contents of this hint should be encoded as a UTF8 string.
+ *
+ *  The default value is "Privacy Policy".  This hint should only be set during app
+ *  initialization, preferably before any calls to SDL_Init().
+ *
+ *  For additional information on linking to a privacy policy, see the documentation for
+ *  SDL_HINT_WINRT_PRIVACY_POLICY_URL.
+ */}
+SDL_HINT_WINRT_PRIVACY_POLICY_LABEL = 'SDL_WINRT_PRIVACY_POLICY_LABEL';
 
-  {**
-   *  \brief If set to 1, back button press events on Windows Phone 8+ will be marked as handled.
-   *
-   *  TODO, WinRT: document SDL_HINT_WINRT_HANDLE_BACK_BUTTON need and use
-   *  For now, more details on why this is needed can be found at the
-   *  beginning of the following web page:
-   *  http://msdn.microsoft.com/en-us/library/windowsphone/develop/jj247550(v=vs.105).aspx
-   *}
-SDL_HINT_WINRT_HANDLE_BACK_BUTTON = 'SDL_HINT_WINRT_HANDLE_BACK_BUTTON';
+{/** 
+ *  \brief Allows back-button-press events on Windows Phone to be marked as handled
+ *
+ *  Windows Phone devices typically feature a Back button.  When pressed,
+ *  the OS will emit back-button-press events, which apps are expected to
+ *  handle in an appropriate manner.  If apps do not explicitly mark these
+ *  events as 'Handled', then the OS will invoke its default behavior for
+ *  unhandled back-button-press events, which on Windows Phone 8 and 8.1 is to
+ *  terminate the app (and attempt to switch to the previous app, or to the
+ *  device's home screen).
+ *
+ *  Setting the SDL_HINT_WINRT_HANDLE_BACK_BUTTON hint to "1" will cause SDL
+ *  to mark back-button-press events as Handled, if and when one is sent to
+ *  the app.
+ *
+ *  Internally, Windows Phone sends back button events as parameters to
+ *  special back-button-press callback functions.  Apps that need to respond
+ *  to back-button-press events are expected to register one or more
+ *  callback functions for such, shortly after being launched (during the
+ *  app's initialization phase).  After the back button is pressed, the OS
+ *  will invoke these callbacks.  If the app's callback(s) do not explicitly
+ *  mark the event as handled by the time they return, or if the app never
+ *  registers one of these callback, the OS will consider the event
+ *  un-handled, and it will apply its default back button behavior (terminate
+ *  the app).
+ *
+ *  SDL registers its own back-button-press callback with the Windows Phone
+ *  OS.  This callback will emit a pair of SDL key-press events (SDL_KEYDOWN
+ *  and SDL_KEYUP), each with a scancode of SDL_SCANCODE_AC_BACK, after which
+ *  it will check the contents of the hint, SDL_HINT_WINRT_HANDLE_BACK_BUTTON.
+ *  If the hint's value is set to "1", the back button event's Handled
+ *  property will get set to 'true'.  If the hint's value is set to something
+ *  else, or if it is unset, SDL will leave the event's Handled property
+ *  alone.  (By default, the OS sets this property to 'false', to note.)
+ *
+ *  SDL apps can either set SDL_HINT_WINRT_HANDLE_BACK_BUTTON well before a
+ *  back button is pressed, or can set it in direct-response to a back button
+ *  being pressed.
+ *
+ *  In order to get notified when a back button is pressed, SDL apps should
+ *  register a callback function with SDL_AddEventWatch(), and have it listen
+ *  for SDL_KEYDOWN events that have a scancode of SDL_SCANCODE_AC_BACK.
+ *  (Alternatively, SDL_KEYUP events can be listened-for.  Listening for
+ *  either event type is suitable.)  Any value of SDL_HINT_WINRT_HANDLE_BACK_BUTTON
+ *  set by such a callback, will be applied to the OS' current
+ *  back-button-press event.
+ *
+ *  More details on back button behavior in Windows Phone apps can be found
+ *  at the following page, on Microsoft's developer site:
+ *  http://msdn.microsoft.com/en-us/library/windowsphone/develop/jj247550(v=vs.105).aspx
+ */}
+SDL_HINT_WINRT_HANDLE_BACK_BUTTON = 'SDL_WINRT_HANDLE_BACK_BUTTON';
 
-  {**
-   *  \brief  A variable that dictates policy for fullscreen Spaces on Mac OS X.
-   *
-   *  This hint only applies to Mac OS X.
-   *
-   *  The variable can be set to the following values:
-   *    "0"       - Disable Spaces support (FULLSCREEN_DESKTOP won't use them and
-   *                SDL_WINDOW_RESIZABLE windows won't offer the "fullscreen"
-   *                button on their titlebars).
-   *    "1"       - Enable Spaces support (FULLSCREEN_DESKTOP will use them and
-   *                SDL_WINDOW_RESIZABLE windows will offer the "fullscreen"
-   *                button on their titlebars.
-   *
-   *  The default value is "1". Spaces are disabled regardless of this hint if
-   *   the OS isn't at least Mac OS X Lion (10.7). This hint must be set before
-   *   any windows are created.
-   *}
+{/**
+ *  \brief  A variable that dictates policy for fullscreen Spaces on Mac OS X.
+ *
+ *  This hint only applies to Mac OS X.
+ *
+ *  The variable can be set to the following values:
+ *    "0"       - Disable Spaces support (FULLSCREEN_DESKTOP won't use them and
+ *                SDL_WINDOW_RESIZABLE windows won't offer the "fullscreen"
+ *                button on their titlebars).
+ *    "1"       - Enable Spaces support (FULLSCREEN_DESKTOP will use them and
+ *                SDL_WINDOW_RESIZABLE windows will offer the "fullscreen"
+ *                button on their titlebars).
+ *
+ *  The default value is "1". Spaces are disabled regardless of this hint if
+ *   the OS isn't at least Mac OS X Lion (10.7). This hint must be set before
+ *   any windows are created.
+ */}
 SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES = 'SDL_VIDEO_MAC_FULLSCREEN_SPACES';
 
-{**
- *  \brief  A hint that specifies the Android APK expansion main file version. 
- *  
- *  The variable should specify the Android APK expansion main file version (a string number like "1", "2" etc.).
- *  This hint must be set together with the hint SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION. 
- *  
- *  If both hints were set then SDL_RWFromFile() will look into expansion files 
- *  after a given relative path was not found in the internal storage and assets.
- *  By default this hint is not set and the APK expansion files are not searched. 
- *} 
-SDL_HINT_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION = 'SDL_HINT_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION';
-
-{**
- *  \brief  A hint that specifies the Android APK expansion patch file version. 
- *  
- *  The variable should specify the Android APK expansion patch file version (a string number like "1", "2" etc.).
- *  This hint must be set together with the hint SDL_HINT_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION. 
- *  
- *  If both hints were set then SDL_RWFromFile() will look into expansion files 
- *  after a given relative path was not found in the internal storage and assets.
- *  By default this hint is not set and the APK expansion files are not searched. 
- *} 
-SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION = 'SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION';
-
-{**
- *  \brief  A hint that specifies a variable to control whether mouse and touch events are to be treated together or separately.
- *  
- *  Possible values:
- *    0  mouse events will be handled as touch events and touch will raise fake mouse events
- *    1  mouse events will be handled separately from pure touch events
- *  
- *  By default mouse events will be handled as touch events and touch will raise fake mouse events. 
- *  The value of this hint is used at runtime, so it can be changed at any time. 
- *}
-SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH = 'SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH';
-
-{**
- *  \brief A hint that specifies a value to override the binding element for keyboard inputs for Emscripten builds. 
- *  
- *  Possible values:
- *    #window      the JavaScript window object (this is the default)
- *    #document    the JavaScript document object
- *    #screen      the JavaScript window.screen object
- *    #canvas      the default WebGL canvas element
- *  
- *  Any other string without a leading # sign applies to the element on the page with that ID. 
- *  This hint only applies to the Emscripten platform. 
- *}
-SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT = 'SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT';
-
-{**
- *  \brief  A hint that specifies whether certain IMEs should handle text editing internally instead of sending SDL_TEXTEDITING events.
- *  
- *  Possible values: 
- *    0  SDL_TEXTEDITING events are sent, and it is the application's responsibility 
- *       to render the text from these events and differentiate it somehow from committed text. (default)
+{/**
+ *  \brief  When set don't force the SDL app to become a foreground process
  *
- *    1  If supported by the IME then SDL_TEXTEDITING events are not sent,
- *       and text that is being composed will be rendered in its own UI.
- *}
-SDL_HINT_IME_INTERNAL_EDITING = 'SDL_HINT_IME_INTERNAL_EDITING';
-
-{**
- *  \brief  A hint that specifies not to catch the SIGINT or SIGTERM signals.
+ *  This hint only applies to Mac OS X.
  *
- *  Possible values:
- *    0  SDL will install a SIGINT and SIGTERM handler, and when it catches a signal, convert it into an SDL_QUIT event (default)
- *    1  SDL will not install a signal handler at all
- *  
- *  This hint only applies to Unix-like platforms. 
- *} 
-SDL_HINT_NO_SIGNAL_HANDLERS = 'SDL_HINT_NO_SIGNAL_HANDLERS';
+ */}
+SDL_HINT_MAC_BACKGROUND_APP = 'SDL_MAC_BACKGROUND_APP';
 
-{**
- *  \brief  A hint that specifies a variable specifying SDL's threads stack size in bytes or "0" for the backend's default size.
- *  
- *  Possible values for this hint are:
- *    0  use the backend's default threads stack size (default)
- *    X  use the provided positive threads stack size
- *  
- *  Use this hint in case you need to set SDL's threads stack size to other than the default.
- *  This is specially useful if you build SDL against a non glibc libc library (such as musl) 
- *  which provides a relatively small default thread stack size (a few kilobytes versus the default 8 MB glibc uses).
+{/**
+ * \brief Android APK expansion main file version. Should be a string number like "1", "2" etc.
  *
- *  Support for this hint is currently available only in the pthread backend.
- *}
-SDL_HINT_THREAD_STACK_SIZE = 'SDL_HINT_THREAD_STACK_SIZE';
+ * Must be set together with SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION.
+ *
+ * If both hints were set then SDL_RWFromFile() will look into expansion files
+ * after a given relative path was not found in the internal storage and assets.
+ *
+ * By default this hint is not set and the APK expansion files are not searched.
+ */} 
+SDL_HINT_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION = 'SDL_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION';
 
-{**
- *  \brief  A hint that specifies whether the windows message loop is processed by SDL.
- *  
- *  Possible values for this hint:
- *    0  the window message loop is not run
- *    1  the window message loop is processed in SDL_PumpEvents()  [default]
- *}
-SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP = 'SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP';
+{/**
+ * \brief Android APK expansion patch file version. Should be a string number like "1", "2" etc.
+ *
+ * Must be set together with SDL_HINT_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION.
+ *
+ * If both hints were set then SDL_RWFromFile() will look into expansion files
+ * after a given relative path was not found in the internal storage and assets.
+ *
+ * By default this hint is not set and the APK expansion files are not searched.
+ */} 
+SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION = 'SDL_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION';
 
-{**
- *  \brief  A hint that specifies that SDL should not to generate SDL_WINDOWEVENT_CLOSE events for Alt+F4 on Microsoft Windows.
- *  
- *  Possible values for this hint:
- *    0  generate an SDL_WINDOWEVENT_CLOSE event for Alt+F4 (default)
- *    1  do not generate event and only do normal key handling for Alt+F4
- *}
-SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4 = 'SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4';
+{/**
+ * \brief A variable to control whether certain IMEs should handle text editing internally instead of sending SDL_TEXTEDITING events.
+ *
+ * The variable can be set to the following values:
+ *   "0"       - SDL_TEXTEDITING events are sent, and it is the application's
+ *               responsibility to render the text from these events and 
+ *               differentiate it somehow from committed text. (default)
+ *   "1"       - If supported by the IME then SDL_TEXTEDITING events are not sent, 
+ *               and text that is being composed will be rendered in its own UI.
+ */}
+SDL_HINT_IME_INTERNAL_EDITING = 'SDL_IME_INTERNAL_EDITING';
 
-{**
+{/**
+ * \brief A variable to control whether mouse and touch events are to be treated together or separately
+ *
+ * The variable can be set to the following values:
+ *   "0"       - Mouse events will be handled as touch events, and touch will raise fake mouse
+ *               events. This is the behaviour of SDL <= 2.0.3. (default)
+ *   "1"       - Mouse events will be handled separately from pure touch events.
+ *
+ * The value of this hint is used at runtime, so it can be changed at any time.
+ */}
+SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH = 'SDL_ANDROID_SEPARATE_MOUSE_AND_TOUCH';
+
+{/**
+ *  \brief override the binding element for keyboard inputs for Emscripten builds
+ *
+ * This hint only applies to the emscripten platform
+ *
+ * The variable can be one of
+ *    "#window"      - The javascript window object (this is the default)
+ *    "#document"    - The javascript document object
+ *    "#screen"      - the javascript window.screen object
+ *    "#canvas"      - the WebGL canvas element
+ *    any other string without a leading # sign applies to the element on the page with that ID.
+ */}
+SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT = 'SDL_EMSCRIPTEN_KEYBOARD_ELEMENT';
+
+{/**
+ *  \brief Tell SDL not to catch the SIGINT or SIGTERM signals.
+ *
+ * This hint only applies to Unix-like platforms.
+ *
+ * The variable can be set to the following values:
+ *   "0"       - SDL will install a SIGINT and SIGTERM handler, and when it
+ *               catches a signal, convert it into an SDL_QUIT event.
+ *   "1"       - SDL will not install a signal handler at all.
+ */} 
+SDL_HINT_NO_SIGNAL_HANDLERS = 'SDL_NO_SIGNAL_HANDLERS';
+
+{/**
+ *  \brief Tell SDL not to generate window-close events for Alt+F4 on Windows.
+ *
+ * The variable can be set to the following values:
+ *   "0"       - SDL will generate a window-close event when it sees Alt+F4.
+ *   "1"       - SDL will only do normal key handling for Alt+F4.
+ */}
+SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4 = 'SDL_WINDOWS_NO_CLOSE_ON_ALT_F4';
+
+{/**
  *  \brief Prevent SDL from using version 4 of the bitmap header when saving BMPs.
  *
  * The bitmap header version 4 is required for proper alpha channel support and
@@ -5204,10 +5304,10 @@ SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4 = 'SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4';
  *               will be in the file, but applications are going to ignore it.
  *
  * The default value is "0".
- *}
+ */}
 SDL_HINT_BMP_SAVE_LEGACY_FORMAT = 'SDL_BMP_SAVE_LEGACY_FORMAT';
 
-{**
+{/**
  * \brief Tell SDL not to name threads on Windows.
  *
  * The variable can be set to the following values:
@@ -5215,25 +5315,23 @@ SDL_HINT_BMP_SAVE_LEGACY_FORMAT = 'SDL_BMP_SAVE_LEGACY_FORMAT';
  *               This is the default behavior of SDL <= 2.0.4. (default)
  *   "1"       - SDL will not raise this exception, and threads will be unnamed.
  *               For .NET languages this is required when running under a debugger.
- *}
+ */}
 SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING = 'SDL_WINDOWS_DISABLE_THREAD_NAMING';  
-{**
- *  \brief  A hint that specifies whether the window frame and title bar are interactive when the cursor is hidden. 
- *  
- *  Possible values for this hint:
- *    0  the window frame is not interactive when the cursor is hidden (no move, resize, etc)
- *    1  the window frame is interactive when the cursor is hidden
- *  
- *  By default SDL will allow interaction with the window frame when the cursor is hidden. 
- *}
-SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN = 'SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN';
+
+{/**
+ * \brief Tell SDL which Dispmanx layer to use on a Raspberry PI
+ *
+ * Also known as Z-order. The variable can take a negative or positive value.
+ * The default is 10000.
+ */}
+SDL_HINT_RPI_VIDEO_LAYER = 'SDL_RPI_VIDEO_LAYER';
+
+type
 
 {/**
  *  \brief  An enumeration of hint priorities
  */}
-type
-  SDL_HintPriority = (SDL_HINT_DEFAULT, SDL_HINT_NORMAL, SDL_HINT_OVERRIDE);
-
+SDL_HintPriority = (SDL_HINT_DEFAULT, SDL_HINT_NORMAL, SDL_HINT_OVERRIDE);
 
 {/**
  *  \brief Set a hint with a specific priority
@@ -5244,29 +5342,30 @@ type
  *
  *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
  */}
-function SDL_SetHintWithPriority( const name: PChar; const value: PChar; priority: SDL_HintPriority) : boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHintWithPriority' {$ENDIF} {$ENDIF};
+function SDL_SetHintWithPriority(const name: PChar; const value: PChar; priority: SDL_HintPriority) : boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHintWithPriority' {$ENDIF} {$ENDIF};
 
-// extern DECLSPEC SDL_bool SDLCALL SDL_SetHintWithPriority(const char *name,
-//                                                         const char *value,
-//                                                         SDL_HintPriority priority);
 {/**
  *  \brief Set a hint with normal priority
  *
  *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
  */}
- function SDL_SetHint( const name: PChar; const value: PChar) : boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHint' {$ENDIF} {$ENDIF};
-
- //extern DECLSPEC SDL_bool SDLCALL SDL_SetHint(const char *name,
-  //                                           const char *value);
+function SDL_SetHint(const name: PChar; const value: PChar): boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHint' {$ENDIF} {$ENDIF};
 
 {/**
  *  \brief Get a hint
  *
  *  \return The string value of a hint variable.
  */}
-function SDL_GetHint( const name: PChar): PChar; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetHint' {$ENDIF} {$ENDIF};
- //extern DECLSPEC const char * SDLCALL SDL_GetHint(const char *name);
+function SDL_GetHint(const name: PChar): PChar; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetHint' {$ENDIF} {$ENDIF};
 
+{/**
+ *  \brief Get a hint
+ *
+ *  \return The boolean value of a hint variable.
+ */}
+function SDL_GetHintBoolean(const name: PChar; default_value: boolean): boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetHintBoolean' {$ENDIF} {$ENDIF};
+
+type
 
 {/**
  *  \brief Add a function to watch a particular hint
@@ -5275,13 +5374,9 @@ function SDL_GetHint( const name: PChar): PChar; cdecl; external SDL_LibName {$I
  *  \param callback The function to call when the hint value changes
  *  \param userdata A pointer to pass to the callback function
  */}
-type
 TSDL_HintCallback = procedure(userdata: Pointer; const name: PChar; const oldValue: PChar; const newValue: PChar);
+
 procedure SDL_AddHintCallback(const name: PChar; callback: TSDL_HintCallback; userdata: Pointer); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AddHintCallback' {$ENDIF} {$ENDIF};
- //typedef void (*SDL_HintCallback)(void *userdata, const char *name, const char *oldValue, const char *newValue);
-//extern DECLSPEC void SDLCALL SDL_AddHintCallback(const char *name,
-//                                                 SDL_HintCallback callback,
-//                                                 void *userdata);
 
 {/**
  *  \brief Remove a function watching a particular hint
@@ -5291,18 +5386,13 @@ procedure SDL_AddHintCallback(const name: PChar; callback: TSDL_HintCallback; us
  *  \param userdata A pointer being passed to the callback function
  */}
 procedure SDL_DelHintCallback(const name: PChar; callback: TSDL_HintCallback; userdata: Pointer); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_DelHintCallback' {$ENDIF} {$ENDIF};
-//extern DECLSPEC void SDLCALL SDL_DelHintCallback(const char *name,
-//                                                 SDL_HintCallback callback,
-//                                                 void *userdata);
 
 {/**
  *  \brief  Clear all hints
  *
  *  This function is called during SDL_Quit() to free stored hints.
  */}
-//extern DECLSPEC void SDLCALL SDL_ClearHints(void);
 procedure SDL_ClearHints(); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_ClearHints' {$ENDIF} {$ENDIF};
-
 
 { included sdlloadso.inc}
 //from sdl_loadso.h
@@ -6420,11 +6510,11 @@ const
   SDL_SCANCODE_INTERNATIONAL7 = 141;
   SDL_SCANCODE_INTERNATIONAL8 = 142;
   SDL_SCANCODE_INTERNATIONAL9 = 143;
-  SDL_SCANCODE_LANG1 = 144; {**< Hangul/English toggle *}
+  SDL_SCANCODE_LANG1 = 144; {**< Hangul{English toggle *}
   SDL_SCANCODE_LANG2 = 145; {**< Hanja conversion *}
   SDL_SCANCODE_LANG3 = 146; {**< Katakana *}
   SDL_SCANCODE_LANG4 = 147; {**< Hiragana *}
-  SDL_SCANCODE_LANG5 = 148; {**< Zenkaku/Hankaku *}
+  SDL_SCANCODE_LANG5 = 148; {**< Zenkaku{Hankaku *}
   SDL_SCANCODE_LANG6 = 149; {**< reserved *}
   SDL_SCANCODE_LANG7 = 150; {**< reserved *}
   SDL_SCANCODE_LANG8 = 151; {**< reserved *}
@@ -6540,7 +6630,7 @@ const
 
   SDL_SCANCODE_BRIGHTNESSDOWN = 275;
   SDL_SCANCODE_BRIGHTNESSUP = 276;
-  SDL_SCANCODE_DISPLAYSWITCH = 277; {**< display mirroring/dual display
+  SDL_SCANCODE_DISPLAYSWITCH = 277; {**< display mirroring{dual display
                                          switch; video mode switch *}
   SDL_SCANCODE_KBDILLUMTOGGLE = 278;
   SDL_SCANCODE_KBDILLUMDOWN = 279;
@@ -7256,6 +7346,12 @@ type
    *}
 
   function SDL_GetCursor: PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetCursor' {$ENDIF}{$ENDIF};
+  
+  {**
+   * Return the default cursor.
+   *}
+   
+   function SDL_GetDefaultCursor: PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetDefaultCursor' {$ENDIF}{$ENDIF};
 
   {**
    *  Frees a cursor created with SDL_CreateCursor().
@@ -9018,6 +9114,15 @@ function SDL_LoadDollarTemplates(touchId: TSDL_TouchID; src: PSDL_RWops): SInt32
    {$DEFINE SDL_VIDEO_DRIVER_COCOA}
 {$ENDIF}
 
+{$IFDEF ANDROID}
+   {$DEFINE SDL_VIDEO_DRIVER_ANDROID}
+{$ENDIF}
+
+{$IFDEF VIVANTE}
+  {$DEFINE SDL_VIDEO_DRIVER_VIVANTE}
+{$ENDIF}
+
+
 {**
  *  These are the various supported windowing subsystems
  *}
@@ -9042,7 +9147,7 @@ Type
 {$IFDEF SDL_VIDEO_DRIVER_WINDOWS}
    __SYSWM_WINDOWS = record
       hwnd:   HWND;   {**< The window for the message }
-      msg:     uInt;   {**< The type of message *}
+      msg:     uInt;  {**< The type of message *}
       wParam: WPARAM; {**< WORD message parameter *}
       lParam: LPARAM; {**< WORD message parameter *}
    end;
@@ -9060,11 +9165,19 @@ Type
 {$IFDEF SDL_VIDEO_DRIVER_COCOA}
    __SYSWM_COCOA = record
       (* No Cocoa window events yet *)
+      dummy: integer;
    end;
 {$ENDIF}
 {$IFDEF SDL_VIDEO_DRIVER_UIKIT}
    __SYSWM_UIKIT = record
       (* No UIKit window events yet *)
+      dummy: integer;
+   end;
+{$ENDIF}
+{$IFDEF SDL_VIDEO_DRIVER_VIVANTE}
+   __SYSWM_VIVANTE = record
+      (* No Vivante window events yet *)
+      dummy: integer;
    end;
 {$ENDIF}
 
@@ -9074,24 +9187,23 @@ Type
    PSDL_SysWMmsg = ^TSDL_SysWMmsg;
    TSDL_SysWMmsg = record
       version: TSDL_version;
-      Case subsystem: TSDL_SYSWM_TYPE of
-         (* Cannot have empty record case *)
-         SDL_SYSWM_UNKNOWN: (dummy: sInt32);
-         {$IFDEF SDL_VIDEO_DRIVER_WINDOWS}
-            SDL_SYSWM_WINDOWS: (win: __SYSWM_WINDOWS);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_X11}
-            SDL_SYSWM_X11: (x11: __SYSWM_X11);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_DIRECTFB}  
-            SDL_SYSWM_DIRECTFB: (dfb: __SYSWM_DIRECTFB); 
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_COCOA}  
-            SDL_SYSWM_COCOA: (cocoa: __SYSWM_COCOA);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_UIKIT}
-            SDL_SYSWM_UIKIT: (uikit: __SYSWM_UIKIT);
-         {$ENDIF}
+      subsystem: TSDL_SYSWM_TYPE;
+      {$IFDEF SDL_VIDEO_DRIVER_WINDOWS}
+        win: __SYSWM_WINDOWS;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_X11}
+        x11: __SYSWM_X11;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_DIRECTFB}
+        dfb: __SYSWM_DIRECTFB;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_COCOA}
+        cocoa: __SYSWM_COCOA;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_UIKIT}
+        uikit: __SYSWM_UIKIT;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_VIVANTE}
+        vivante: __SYSWM_VIVANTE;
+      {$ELSE}
+        (* Cannot have empty record case *)
+        dummy: integer;
+      {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF}
    end;
 
 /// Once again, sdl_syswm.h uses anonymous structs, declared right in SDL_SysWMinfo.
@@ -9099,6 +9211,7 @@ Type
 {$IFDEF SDL_VIDEO_DRIVER_WINDOWS}
    __WMINFO_WINDOWS = record
       window: HWND; {**< The window handle *}
+      hdc:    HDC;  {**< The window device context *}
    end;
 {$ENDIF}
 {$IFDEF SDL_VIDEO_DRIVER_WINRT} // Since SDL 2.0.3
@@ -9109,7 +9222,7 @@ Type
 {$IFDEF SDL_VIDEO_DRIVER_X11}
    __WMINFO_X11 = record
       display: PDisplay;  {**< The X11 display *}
-      window: TWindow;     {**< The X11 window *}
+      window:  TWindow;   {**< The X11 window *}
    end;
 {$ENDIF}
 {$IFDEF SDL_VIDEO_DRIVER_DIRECTFB}
@@ -9126,7 +9239,10 @@ Type
 {$ENDIF}
 {$IFDEF SDL_VIDEO_DRIVER_UIKIT}
    __WMINFO_UIKIT = record
-      window: UIWindow;   {* The UIKit window *}
+      window: UIWindow;           {* The UIKit window *}
+      framebuffer: GLuint;        {* The GL view's Framebuffer Object. It must be bound when rendering to the screen using GL. *}
+      colorbuffer: GLuint;        {* The GL view's color Renderbuffer Object. It must be bound when SDL_GL_SwapWindow is called. *}
+      resolveFramebuffer: GLuint; {* The Framebuffer Object which holds the resolve color Renderbuffer, when MSAA is used. *}
    end;
 {$ENDIF}
 {$IFDEF SDL_VIDEO_DRIVER_WAYLAND} // Since SDL 2.0.2
@@ -9142,10 +9258,16 @@ Type
       surface: PMirSurface;       {**< Mir surface *}
    end;
 {$ENDIF}
-{$IFDEF SDL_VIDEO_DRIVER_ANDROID} // Planned for SDL 2.0.4
+{$IFDEF SDL_VIDEO_DRIVER_ANDROID}
    __WMINFO_ANDROID = record
-      window : PANativeWindow;
+      window:  PANativeWindow;
       surface: PEGLSurface;
+   end;
+{$ENDIF}
+{$IFDEF SDL_VIDEO_DRIVER_VIVANTE}
+   __WMINFO_VIVANTE = record
+      display: EGLNativeDisplayType;
+      window:  EGLNativeWindowType;
    end;
 {$ENDIF}
 
@@ -9158,33 +9280,31 @@ Type
    PSDL_SysWMinfo = ^TSDL_SysWMinfo;
    TSDL_SysWMinfo = record
       version: TSDL_version;
-      Case subsystem: TSDL_SYSWM_TYPE of
-         (* Cannot have empty record case *)
-         SDL_SYSWM_UNKNOWN: (dummy: sInt32);
-         {$IFDEF SDL_VIDEO_DRIVER_WINDOWS}
-            SDL_SYSWM_WINDOWS: (win : __WMINFO_WINDOWS);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_WINRT}
-            SDL_SYSWM_WINRT: (winrt : __WMINFO_WINRT);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_X11}
-            SDL_SYSWM_X11: (x11 : __WMINFO_X11);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_DIRECTFB}
-            SDL_SYSWM_DIRECTFB: (dfb : __WMINFO_DFB);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_COCOA}
-            SDL_SYSWM_COCOA: (cocoa : __WMINFO_COCOA);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_UIKIT}
-            SDL_SYSWM_UIKIT: (uikit : __WMINFO_UIKIT);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_WAYLAND}
-            SDL_SYSWM_WAYLAND: (wl : __WMINFO_WAYLAND);
-         {$ENDIF}
-         {$IFDEF SDL_VIDEO_DRIVER_MIR}
-            SDL_SYSWM_MIR: (mir : __WMINFO_MIR);
-         {$ENDIF}
+      subsystem: TSDL_SYSWM_TYPE;
+      {$IFDEF SDL_VIDEO_DRIVER_WINDOWS}
+        win : __WMINFO_WINDOWS;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_WINRT}
+        winrt : __WMINFO_WINRT;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_X11}
+        x11 : __WMINFO_X11;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_DIRECTFB}
+        dfb : __WMINFO_DFB;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_COCOA}
+        cocoa : __WMINFO_COCOA;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_UIKIT}
+        uikit : __WMINFO_UIKIT;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_WAYLAND}
+        wl : __WMINFO_WAYLAND;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_MIR}
+        mir : __WMINFO_MIR;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_ANDROID}
+        android: __WMINFO_ANDROID;
+      {$ELSE} {$IFDEF SDL_VIDEO_DRIVER_VIVANTE}
+        vivante: __WMINFO_VIVANTE;
+      {$ELSE}
+        (* Cannot have empty record case *)
+        dummy: integer;
+      {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF} {$ENDIF}
    end;
 
 {* Function prototypes *}
@@ -10480,17 +10600,17 @@ end;
 {$ENDIF}
 
 //from "sdl_rect.h"
-function SDL_RectEmpty(X: TSDL_Rect): Boolean;
+function SDL_RectEmpty(const r: PSDL_Rect): Boolean;
 begin
-  Result := (X.w <= 0) or (X.h <= 0);
+  Result := (r^.w <= 0) or (r^.h <= 0);
 end;
 
-function SDL_RectEquals(A: TSDL_Rect; B: TSDL_Rect): Boolean;
+function SDL_RectEquals(const a, b: PSDL_Rect): Boolean;
 begin
-  Result := (A.x = B.x) and (A.y = B.y) and (A.w = B.w) and (A.h = B.h);
+  Result := (a^.x = b^.x) and (a^.y = b^.y) and (a^.w = b^.w) and (a^.h = b^.h);
 end;
 
-function SDL_PointInRect(const p: PSDL_Point; const r: PSDL_Rect): Boolean; Inline;
+function SDL_PointInRect(const p: PSDL_Point; const r: PSDL_Rect): Boolean;
 begin
   Result := 
     (p^.x >= r^.x) and (p^.x < (r^.x + r^.w)) 
@@ -10658,3 +10778,4 @@ begin
 end;
 
 end.
+

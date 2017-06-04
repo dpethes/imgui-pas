@@ -1,6 +1,6 @@
 {
 Bindings for dear imgui (AKA ImGui) - a bloat-free graphical user interface library for C++
-Based on cimgui+ImGui 1.49/1.50
+Based on ImGui 1.50 + cimgui wrapper
 Not all functions were tested.
 }
 unit fpimgui;
