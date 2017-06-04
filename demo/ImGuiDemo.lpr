@@ -39,7 +39,7 @@ begin
   //open new SDL window with OpenGL rendering support
   SDL_Init(SDL_INIT_VIDEO or SDL_INIT_TIMER);
   disp := TDisplay.Create;
-  disp.InitDisplay(800, 800);
+  disp.InitDisplay(800, 600);
 
   testwin := TTestWindow.Create;
   counter := 0;

@@ -30,7 +30,6 @@ type
 
       procedure InitGui;
       procedure InitRenderingContext(const height: word; const width: word);
-      procedure DrawGui();
   end;
   
   
@@ -48,6 +47,7 @@ begin
       SDL_InitSubSystem(SDL_INIT_VIDEO);
   end;
   InitRenderingContext(height, width);
+  InitGui();
 end;
 
 procedure TDisplay.InitRenderingContext(const height: word; const width: word);
@@ -78,8 +78,16 @@ begin
   context := SDL_GL_CreateContext(window);
   SDL_GL_SetSwapInterval(1); //enable VSync
   glClearColor( 0.0, 0.0, 0.0, 0);
+end;
 
-  InitGui();
+procedure TDisplay.InitGui;
+var
+  io: PImGuiIO;
+begin
+  io := ImGui.GetIO();
+  io^.DisplaySize.x := w;
+  io^.DisplaySize.y := h;
+  ImGui_ImplSdlGL2_Init();
 end;
 
 procedure TDisplay.FreeDisplay;
@@ -105,28 +113,9 @@ end;
 procedure TDisplay.DrawFrame;
 begin
   Assert(in_frame, 'DrawFrame without NewFrame!');
-  DrawGui();
   SDL_GL_SwapWindow(window);
   in_frame := false;
 end;
-
-procedure TDisplay.InitGui;
-var
-  io: PImGuiIO;
-begin
-  io := ImGui.GetIO();
-  io^.DisplaySize.x := w;
-  io^.DisplaySize.y := h;
-  ImGui_ImplSdlGL2_Init();
-end;
-
-procedure TDisplay.DrawGui;
-begin
-  ImGui.Render;
-end;
-
-
-
 
 end.
 

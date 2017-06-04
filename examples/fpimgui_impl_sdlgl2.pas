@@ -95,7 +95,7 @@ begin
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
 
     // Store our identifier
-    ImFontAtlas_SetTexID(font_atlas, Pointer(g_FontTexture));
+    ImFontAtlas_SetTexID(font_atlas, ImTextureID(g_FontTexture));
 
     // Restore state
     glBindTexture(GL_TEXTURE_2D, last_texture);
