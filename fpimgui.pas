@@ -1202,6 +1202,7 @@ procedure ImGuiIO_ClearInputCharacters(); cdecl; external ImguiLibName;
 
 {ImDrawData }
 procedure ImDrawData_DeIndexAllBuffers(drawData: PImDrawData); cdecl; external ImguiLibName;
+procedure ImDrawData_ScaleClipRects(drawData: PImDrawData; sc: ImVec2); cdecl; external ImguiLibName;
 
 {ImDrawList }
 function ImDrawList_GetVertexBufferSize(list: PImDrawList): longint; cdecl; external ImguiLibName;
@@ -1235,6 +1236,7 @@ procedure ImDrawList_AddText(list: PImDrawList; pos: ImVec2; col: ImU32; text_be
 procedure ImDrawList_AddTextExt(list: PImDrawList; font: PImFont; font_size: single; pos: ImVec2; col: ImU32; text_begin: PChar;
   text_end: PChar; wrap_width: single; cpu_fine_clip_rect: PImVec4); cdecl; external ImguiLibName;
 procedure ImDrawList_AddImage(list: PImDrawList; user_texture_id: ImTextureID; a: ImVec2; b: ImVec2; uva: ImVec2; uvb: ImVec2; col: ImU32); cdecl; external ImguiLibName;
+procedure ImDrawList_AddImageQuad(list: PImDrawList; user_texture_id: ImTextureID; const a, b, c, d: ImVec2; const uva, uvb, uvc, uvd: ImVec2; col: ImU32); cdecl; external ImguiLibName;
 procedure ImDrawList_AddPolyline(list: PImDrawList; points: PImVec2; num_points: longint; col: ImU32; closed: bool; thickness: single;
   anti_aliased: bool); cdecl; external ImguiLibName;
 procedure ImDrawList_AddConvexPolyFilled(list: PImDrawList; points: PImVec2; num_points: longint; col: ImU32; anti_aliased: bool); cdecl; external ImguiLibName;
