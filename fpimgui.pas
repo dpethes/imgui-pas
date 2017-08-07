@@ -586,34 +586,37 @@ public
   class procedure ProgressBar(fraction: single; size_arg: PImVec2; overlay: PChar);  inline;
 
   { Widgets: Sliders (tip: ctrl+click on a slider to input text) }
-  class function  SliderFloat(_label: PChar; v: Psingle; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  SliderFloat2(_label: PChar; v: TFloat2; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  SliderFloat3(_label: PChar; v: TFloat3; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  SliderFloat4(_label: PChar; v: TFloat4; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  SliderAngle(_label: PChar; v_rad: Psingle; v_degrees_min: single; v_degrees_max: single): bool;  inline;
-  class function  SliderInt(_label: PChar; v: Plongint; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  SliderInt2(_label: PChar; v: TLongInt2; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  SliderInt3(_label: PChar; v: TLongInt3; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  SliderInt4(_label: PChar; v: TLongInt4; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  VSliderFloat(_label: PChar; size: ImVec2; v: Psingle; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  VSliderInt(_label: PChar; size: ImVec2; v: Plongint; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
+  class function  SliderFloat (_label: PChar; v: Psingle; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  SliderFloat2(_label: PChar; v: TFloat2; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  SliderFloat3(_label: PChar; v: TFloat3; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  SliderFloat4(_label: PChar; v: TFloat4; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  SliderAngle(_label: PChar; v_rad: Psingle; v_degrees_min: single = -360; v_degrees_max: single = 360): bool;  inline;
+  class function  SliderInt (_label: PChar; v: Plongint; v_min: longint; v_max: longint;  display_format: PChar = '%.0f'): bool;  inline;
+  class function  SliderInt2(_label: PChar; v: TLongInt2; v_min: longint; v_max: longint; display_format: PChar = '%.0f'): bool;  inline;
+  class function  SliderInt3(_label: PChar; v: TLongInt3; v_min: longint; v_max: longint; display_format: PChar = '%.0f'): bool;  inline;
+  class function  SliderInt4(_label: PChar; v: TLongInt4; v_min: longint; v_max: longint; display_format: PChar = '%.0f'): bool;  inline;
+  class function  VSliderFloat(_label: PChar; size: ImVec2; v: Psingle; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  VSliderInt(_label: PChar; size: ImVec2; v: Plongint; v_min: longint; v_max: longint; display_format: PChar = '%.0f'): bool;  inline;
 
   { Widgets: Drags (tip: ctrl+click on a drag box to input text) }
   // For all the Float2/Float3/Float4/Int2/Int3/Int4 versions of every functions, remember than a 'float v[3]' function argument is the same as 'float* v'. You can pass address of your first element out of a contiguous set, e.g. &myvector.x
-  { If v_max >= v_max we have no bound }
-  class function  DragFloat(_label: PChar; v: Psingle; v_speed: single; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  DragFloat2(_label: PChar; v: TFloat2; v_speed: single; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  DragFloat3(_label: PChar; v: TFloat3; v_speed: single; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  DragFloat4(_label: PChar; v: TFloat4; v_speed: single; v_min: single; v_max: single; display_format: PChar; power: single): bool;  inline;
-  class function  DragFloatRange2(_label: PChar; v_current_min: Psingle; v_current_max: Psingle; v_speed: single; v_min: single; v_max: single;   display_format: PChar; display_format_max: PChar; power: single): bool;  inline;
-  { If v_max >= v_max we have no bound }
-  class function  DragInt(_label: PChar; v: Plongint; v_speed: single; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  DragInt2(_label: PChar; v: TLongInt2; v_speed: single; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  DragInt3(_label: PChar; v: TLongInt3; v_speed: single; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  DragInt4(_label: PChar; v: TLongInt4; v_speed: single; v_min: longint; v_max: longint; display_format: PChar): bool;  inline;
-  class function  DragIntRange2(_label: PChar; v_current_min: Plongint; v_current_max: Plongint; v_speed: single; v_min: longint; v_max: longint;   display_format: PChar; display_format_max: PChar): bool;  inline;
+  { If v_min >= v_max we have no bound }
+  class function  DragFloat (_label: PChar; v: Psingle; v_speed: single; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  DragFloat2(_label: PChar; v: TFloat2; v_speed: single; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  DragFloat3(_label: PChar; v: TFloat3; v_speed: single; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  DragFloat4(_label: PChar; v: TFloat4; v_speed: single; v_min: single; v_max: single; display_format: PChar = '%.3f'; power: single = 1): bool;  inline;
+  class function  DragFloatRange2(_label: PChar; v_current_min: Psingle; v_current_max: Psingle; v_speed: single = 1;
+                                  v_min: single = 0; v_max: single = 0; display_format: PChar = '%.3f'; display_format_max: PChar = nil; power: single = 1): bool;  inline;
 
-  { Widgets: Input }
+  { If v_min >= v_max we have no bound }
+  class function  DragInt (_label: PChar; v: Plongint;  v_speed: single = 1; v_min: longint = 0; v_max: longint = 0; display_format: PChar = '%.0f'): bool;  inline;
+  class function  DragInt2(_label: PChar; v: TLongInt2; v_speed: single = 1; v_min: longint = 0; v_max: longint = 0; display_format: PChar = '%.0f'): bool;  inline;
+  class function  DragInt3(_label: PChar; v: TLongInt3; v_speed: single = 1; v_min: longint = 0; v_max: longint = 0; display_format: PChar = '%.0f'): bool;  inline;
+  class function  DragInt4(_label: PChar; v: TLongInt4; v_speed: single = 1; v_min: longint = 0; v_max: longint = 0; display_format: PChar = '%.0f'): bool;  inline;
+  class function  DragIntRange2(_label: PChar; v_current_min: Plongint; v_current_max: Plongint; v_speed: single = 1;
+                                v_min: longint = 0; v_max: longint = 0; display_format: PChar = '%.0f'; display_format_max: PChar = nil): bool;  inline;
+
+  { Widgets: Input with Keyboard }
   class function  InputText(_label: PChar; buf: PChar; buf_size: size_t; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback;   user_data: pointer): bool;  inline;
   class function  InputTextMultiline(_label: PChar; buf: PChar; buf_size: size_t; size: ImVec2; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback;   user_data: pointer): bool;  inline;
   class function  InputFloat(_label: PChar; v: Psingle; step: single; step_fast: single; decimal_precision: longint; extra_flags: ImGuiInputTextFlags): bool;    inline;
