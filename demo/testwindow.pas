@@ -1,4 +1,8 @@
-{ partial translation of imgui demo / ShowTestWindow
+{ Partial translation of imgui demo / ShowTestWindow
+  While you're probably better off with the original version as it's way more extensive,
+  this is good as
+    * a test case for the bindings or
+    * a quick guide if something isn't translated in a straightforward way
 }
 unit TestWindow;
 {$mode objfpc}{$H+}
@@ -167,6 +171,8 @@ end;
 procedure TTestWindow.Show(var p_open: boolean);
 var
   window_flags: ImGuiWindowFlags = 0;
+  draw_list: PImDrawList;
+  value_raw, value_with_lock_threshold, mouse_delta: ImVec2;
 begin
   // Demonstrate the various window flags. Typically you would just use the default.
   if (no_titlebar)   then window_flags := window_flags or ord(ImGuiWindowFlags_NoTitleBar);
@@ -177,7 +183,7 @@ begin
   if (no_collapse)   then window_flags := window_flags or ord(ImGuiWindowFlags_NoCollapse);
   if (not no_menu)   then window_flags := window_flags or ord(ImGuiWindowFlags_MenuBar);
   ImGui.SetNextWindowSize(ImVec2Init(550,680), ord(ImGuiSetCond_FirstUseEver));
-  if not ImGui.Begin_('ImGui Demo', @p_open, window_flags) then begin
+  if not ImGui.Begin_('ImGui Demo (translated version)', @p_open, window_flags) then begin
       // Early out if the window is collapsed, as an optimization.
       ImGui.End_;
       exit;
@@ -252,11 +258,36 @@ begin
       end;
   end;
 
-  //Widgets
-  if (ImGui.CollapsingHeader('Widgets')) then
+  if ImGui.CollapsingHeader('Widgets') then
   begin
-      if (ImGui.TreeNode('Trees')) then
+      if ImGui.TreeNode('Trees') then
           Trees;
+  end;
+
+  if ImGui.CollapsingHeader('Keyboard, Mouse & Focus') then
+  begin
+      if ImGui.TreeNode('Dragging') then
+      begin
+          ImGui.TextWrapped('You can use ImGui::GetMouseDragDelta(0) to query for the dragged amount on any widget.');
+          ImGui.Button('Drag Me');
+          if ImGui.IsItemActive() then
+          begin
+              // Draw a line between the button and the mouse cursor
+              draw_list := ImGui.GetWindowDrawList();
+              draw_list^.PushClipRectFullScreen;
+              draw_list^.AddLine(ImGui.CalcItemRectClosestPoint(ImGui.GetIO()^.MousePos, true, -2.0), ImGui.GetIO()^.MousePos,
+                  ImColor(ImGui.GetStyle()^.Colors[ImGuiCol_Button]), 4.0);
+              draw_list^.PopClipRect;
+
+              value_raw := ImGui.GetMouseDragDelta(0, 0.0);
+              value_with_lock_threshold := ImGui.GetMouseDragDelta(0);
+              mouse_delta := ImGui.GetIO()^.MouseDelta;
+              ImGui.SameLine();
+              ImGui.Text('Raw (%.1f, %.1f), WithLockThresold (%.1f, %.1f), MouseDelta (%.1f, %.1f)',
+                  [value_raw.x, value_raw.y, value_with_lock_threshold.x, value_with_lock_threshold.y, mouse_delta.x, mouse_delta.y]);
+          end;
+          ImGui.TreePop();
+      end;
   end;
 
   ImGui.End_;
