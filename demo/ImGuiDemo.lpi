@@ -25,7 +25,7 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="ImGuiDemo.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -52,6 +52,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="TestWindow"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="imgui_extra.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

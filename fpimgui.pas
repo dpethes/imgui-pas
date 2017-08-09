@@ -386,7 +386,9 @@ type
   TCol4 = array[0..3] of single;
 
 function ImVec2Init(const x, y: single): Imvec2; inline;
+function ImVec4Init(const x, y, z, w: single): ImVec4; inline;
 function ImIDPtr(const i: integer): pointer; inline;
+function ImColor(const color: ImVec4): ImU32; inline;
 
 { Static ImGui class, wraps external cimgui dll calls
 Used for:
@@ -1290,11 +1292,25 @@ begin
   result.y := y;
 end;
 
+function ImVec4Init(const x, y, z, w: single): ImVec4;
+begin
+  result.x := x;
+  result.y := y;
+  result.z := z;
+  result.w := w;
+end;
+
 //Replacement for (void*)(intptr_t) int cast, used for IDs. Generates warnings
 function ImIDPtr(const i: integer): pointer;
 begin
   result := pointer( IntPtr(i) )
 end;
+
+function ImColor(const color: ImVec4): ImU32;
+begin
+  result := ImGui.ColorConvertFloat4ToU32(color);
+end;
+
 
 { ImGui
   Keep functions short, they're mostly just wrappers. Inlining begin/end with trivial function body is ok

@@ -3,7 +3,7 @@ program ImGuiDemo;
 uses
   sysutils,
   sdl2, display,
-  fpimgui, fpimgui_impl_sdlgl2, TestWindow;
+  fpimgui, fpimgui_impl_sdlgl2, imgui_extra, TestWindow;
 
 var
   disp: TDisplay;
@@ -43,6 +43,10 @@ begin
 
   testwin := TTestWindow.Create;
   counter := 0;
+
+  //uncomment to set a different gui theme
+  //SetupImGuiStyle2();
+
   while true do begin
       //begin new frame - clear screen etc.
       disp.NewFrame;
