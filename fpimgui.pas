@@ -5,6 +5,7 @@ Not all functions were tested.
 }
 unit fpimgui;
 {$mode objfpc}{$H+}
+{$modeswitch advancedrecords}
 
 interface
 
@@ -344,6 +345,8 @@ type
   ImVectorDrawCmd = specialize ImVector<PImDrawCmd>;
   ImVectorDrawIdx = specialize ImVector<PImDrawIdx>;
   ImVectorDrawVert = specialize ImVector<PImDrawVert>;
+
+  //definitions for private members aren't translated, so always pass around pointers to this struct and don't copy it
   ImDrawList = record
       CmdBuffer: ImVectorDrawCmd;
       IdxBuffer: ImVectorDrawIdx;
@@ -781,6 +784,77 @@ public
 
   { Internal state access - if you want to share ImGui state between modules (e.g. DLL) or allocate it yourself }
   class function  GetVersion(): PChar;  inline;
+end;
+
+
+
+{ Record helper for ImDrawList, wraps external cimgui dll calls
+Used for:
+- having original's C++ styled API - struct with functions
+- adding default parameters
+Notes:
+- it could be a type helper for PImDrawList instead of record helper, but Lazarus' code completion seems to work better this way (at the moment)
+}
+TImDrawListHelper = record helper for ImDrawList
+  procedure PushClipRect(clip_rect_min: ImVec2; clip_rect_max: ImVec2; intersect_with_current_clip_rect: bool);  inline;
+  procedure PushClipRectFullScreen();  inline;
+  procedure PopClipRect();  inline;
+  procedure PushTextureID(texture_id: ImTextureID);  inline;
+  procedure PopTextureID();  inline;
+
+  { Primitives }
+  procedure AddLine(a: ImVec2; b: ImVec2; col: ImU32; thickness: single);  inline;
+  procedure AddRect(a: ImVec2; b: ImVec2; col: ImU32; rounding: single; rounding_corners_flags: longint; thickness: single);  inline;
+  procedure AddRectFilled(a: ImVec2; b: ImVec2; col: ImU32; rounding: single; rounding_corners_flags: longint);  inline;
+  procedure AddRectFilledMultiColor(a: ImVec2; b: ImVec2; col_upr_left: ImU32; col_upr_right: ImU32;  col_bot_right: ImU32; col_bot_left: ImU32);  inline;
+  procedure AddQuad(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; col: ImU32; thickness: single);  inline;
+  procedure AddQuadFilled(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; col: ImU32);  inline;
+  procedure AddTriangle(a: ImVec2; b: ImVec2; c: ImVec2; col: ImU32; thickness: single);  inline;
+  procedure AddTriangleFilled(a: ImVec2; b: ImVec2; c: ImVec2; col: ImU32);  inline;
+  procedure AddCircle(centre: ImVec2; radius: single; col: ImU32; num_segments: longint; thickness: single);  inline;
+  procedure AddCircleFilled(centre: ImVec2; radius: single; col: ImU32; num_segments: longint);  inline;
+  procedure AddText(pos: ImVec2; col: ImU32; text_begin: PChar; text_end: PChar);  inline;
+  procedure AddTextExt(font: PImFont; font_size: single; pos: ImVec2; col: ImU32; text_begin: PChar;  text_end: PChar; wrap_width: single; cpu_fine_clip_rect: PImVec4);  inline;
+  procedure AddImage(user_texture_id: ImTextureID; a: ImVec2; b: ImVec2; uva: ImVec2; uvb: ImVec2; col: ImU32);  inline;
+  procedure AddImageQuad(user_texture_id: ImTextureID; const a, b, c, d: ImVec2; const uva, uvb, uvc, uvd: ImVec2; col: ImU32);  inline;
+  procedure AddPolyline(points: PImVec2; num_points: longint; col: ImU32; closed: bool; thickness: single;  anti_aliased: bool);  inline;
+  procedure AddConvexPolyFilled(points: PImVec2; num_points: longint; col: ImU32; anti_aliased: bool);  inline;
+  procedure AddBezierCurve(pos0: ImVec2; cp0: ImVec2; cp1: ImVec2; pos1: ImVec2; col: ImU32; thickness: single;  num_segments: longint);  inline;
+
+  { Stateful path API, add points then finish with PathFill() or PathStroke() }
+  procedure PathClear();  inline;
+  procedure PathLineTo(pos: ImVec2);  inline;
+  procedure PathLineToMergeDuplicate(pos: ImVec2);  inline;
+  procedure PathFillConvex(col: ImU32);  inline;
+  procedure PathStroke(col: ImU32; closed: bool; thickness: single);  inline;
+  procedure PathArcTo(centre: ImVec2; radius: single; a_min: single; a_max: single; num_segments: longint);  inline;
+  { Use precomputed angles for a 12 steps circle }
+  procedure PathArcToFast(centre: ImVec2; radius: single; a_min_of_12: longint; a_max_of_12: longint);  inline;
+  procedure PathBezierCurveTo(p1: ImVec2; p2: ImVec2; p3: ImVec2; num_segments: longint);  inline;
+  procedure PathRect(rect_min: ImVec2; rect_max: ImVec2; rounding: single; rounding_corners_flags: longint);  inline;
+
+  { Channels }
+  procedure ChannelsSplit(channels_count: longint);  inline;
+  procedure ChannelsMerge();  inline;
+  procedure ChannelsSetCurrent(channel_index: longint);  inline;
+
+  { Advanced }
+  { Your rendering function must check for 'UserCallback' in ImDrawCmd and call the function instead of rendering triangles. }
+  procedure AddCallback(callback: ImDrawCallback; callback_data: pointer);  inline;
+  { This is useful if you need to forcefully create a new draw call (to allow for dependent rendering / blending). Otherwise primitives are merged into the same draw-call as much as possible }
+  procedure AddDrawCmd();  inline;
+
+  { Internal helpers }
+  { NB: all primitives needs to be reserved via PrimReserve() beforehand! }
+  procedure PrimReserve(idx_count: longint; vtx_count: longint);  inline;
+  procedure PrimRect(a: ImVec2; b: ImVec2; col: ImU32);  inline;
+  procedure PrimRectUV(a: ImVec2; b: ImVec2; uv_a: ImVec2; uv_b: ImVec2; col: ImU32);  inline;
+  procedure PrimQuadUV(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; uv_a: ImVec2; uv_b: ImVec2; uv_c: ImVec2;  uv_d: ImVec2; col: ImU32);  inline;
+  procedure PrimWriteVtx(pos: ImVec2; uv: ImVec2; col: ImU32);  inline;
+  procedure PrimWriteIdx(idx: ImDrawIdx);  inline;
+  procedure PrimVtx(pos: ImVec2; uv: ImVec2; col: ImU32);  inline;
+  procedure UpdateClipRect();  inline;
+  procedure UpdateTextureID; inline;
 end;
 
 
@@ -1953,5 +2027,110 @@ class procedure ImGui.SetClipboardText(_text: PChar);
 class function ImGui.GetVersion(): PChar;
     begin result := igGetVersion end;
 
+
+
+{ TImDrawListHelper }
+
+procedure TImDrawListHelper.PushClipRect(clip_rect_min: ImVec2; clip_rect_max: ImVec2; intersect_with_current_clip_rect: bool);
+    begin ImDrawList_PushClipRect(@self, clip_rect_min, clip_rect_max, intersect_with_current_clip_rect) end;
+procedure TImDrawListHelper.PushClipRectFullScreen();
+    begin ImDrawList_PushClipRectFullScreen(@self) end;
+procedure TImDrawListHelper.PopClipRect();
+    begin ImDrawList_PopClipRect(@self) end;
+procedure TImDrawListHelper.PushTextureID(texture_id: ImTextureID);
+    begin ImDrawList_PushTextureID(@self, texture_id) end;
+procedure TImDrawListHelper.PopTextureID();
+    begin ImDrawList_PopTextureID(@self) end;
+procedure TImDrawListHelper.AddLine(a: ImVec2; b: ImVec2; col: ImU32; thickness: single);
+    begin ImDrawList_AddLine(@self, a, b, col, thickness) end;
+procedure TImDrawListHelper.AddRect(a: ImVec2; b: ImVec2; col: ImU32; rounding: single; rounding_corners_flags: longint; thickness: single);
+    begin ImDrawList_AddRect(@self, a, b, col, rounding, rounding_corners_flags, thickness) end;
+procedure TImDrawListHelper.AddRectFilled(a: ImVec2; b: ImVec2; col: ImU32; rounding: single; rounding_corners_flags: longint);
+    begin ImDrawList_AddRectFilled(@self, a, b, col, rounding, rounding_corners_flags) end;
+procedure TImDrawListHelper.AddRectFilledMultiColor(a: ImVec2; b: ImVec2; col_upr_left: ImU32; col_upr_right: ImU32;  col_bot_right: ImU32; col_bot_left: ImU32);
+    begin ImDrawList_AddRectFilledMultiColor(@self, a, b, col_upr_left, col_upr_right,  col_bot_right, col_bot_left) end;
+procedure TImDrawListHelper.AddQuad(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; col: ImU32; thickness: single);
+    begin ImDrawList_AddQuad(@self, a, b, c, d, col, thickness) end;
+procedure TImDrawListHelper.AddQuadFilled(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; col: ImU32);
+    begin ImDrawList_AddQuadFilled(@self, a, b, c, d, col) end;
+procedure TImDrawListHelper.AddTriangle(a: ImVec2; b: ImVec2; c: ImVec2; col: ImU32; thickness: single);
+    begin ImDrawList_AddTriangle(@self, a, b, c, col, thickness) end;
+procedure TImDrawListHelper.AddTriangleFilled(a: ImVec2; b: ImVec2; c: ImVec2; col: ImU32);
+    begin ImDrawList_AddTriangleFilled(@self, a, b, c, col) end;
+procedure TImDrawListHelper.AddCircle(centre: ImVec2; radius: single; col: ImU32; num_segments: longint; thickness: single);
+    begin ImDrawList_AddCircle(@self, centre, radius, col, num_segments, thickness) end;
+procedure TImDrawListHelper.AddCircleFilled(centre: ImVec2; radius: single; col: ImU32; num_segments: longint);
+    begin ImDrawList_AddCircleFilled(@self, centre, radius, col, num_segments) end;
+procedure TImDrawListHelper.AddText(pos: ImVec2; col: ImU32; text_begin: PChar; text_end: PChar);
+    begin ImDrawList_AddText(@self, pos, col, text_begin, text_end) end;
+procedure TImDrawListHelper.AddTextExt(font: PImFont; font_size: single; pos: ImVec2; col: ImU32; text_begin: PChar;  text_end: PChar; wrap_width: single; cpu_fine_clip_rect: PImVec4);
+    begin ImDrawList_AddTextExt(@self, font, font_size, pos, col, text_begin,  text_end, wrap_width, cpu_fine_clip_rect) end;
+procedure TImDrawListHelper.AddImage(user_texture_id: ImTextureID; a: ImVec2; b: ImVec2; uva: ImVec2; uvb: ImVec2; col: ImU32);
+    begin ImDrawList_AddImage(@self, user_texture_id, a, b, uva, uvb, col) end;
+procedure TImDrawListHelper.AddImageQuad(user_texture_id: ImTextureID; const a, b, c, d: ImVec2; const uva, uvb, uvc, uvd: ImVec2; col: ImU32);
+    begin ImDrawList_AddImageQuad(@self, user_texture_id, a, b, c, d, uva, uvb, uvc, uvd, col) end;
+procedure TImDrawListHelper.AddPolyline(points: PImVec2; num_points: longint; col: ImU32; closed: bool; thickness: single;  anti_aliased: bool);
+    begin ImDrawList_AddPolyline(@self, points, num_points, col, closed, thickness,  anti_aliased) end;
+procedure TImDrawListHelper.AddConvexPolyFilled(points: PImVec2; num_points: longint; col: ImU32; anti_aliased: bool);
+    begin ImDrawList_AddConvexPolyFilled(@self, points, num_points, col, anti_aliased) end;
+procedure TImDrawListHelper.AddBezierCurve(pos0: ImVec2; cp0: ImVec2; cp1: ImVec2; pos1: ImVec2; col: ImU32; thickness: single;  num_segments: longint);
+    begin ImDrawList_AddBezierCurve(@self, pos0, cp0, cp1, pos1, col, thickness,  num_segments) end;
+
+{ Stateful path API, add points then finish with PathFill() or PathStroke() }
+procedure TImDrawListHelper.PathClear();
+    begin ImDrawList_PathClear(@self) end;
+procedure TImDrawListHelper.PathLineTo(pos: ImVec2);
+    begin ImDrawList_PathLineTo(@self, pos) end;
+procedure TImDrawListHelper.PathLineToMergeDuplicate(pos: ImVec2);
+    begin ImDrawList_PathLineToMergeDuplicate(@self, pos) end;
+procedure TImDrawListHelper.PathFillConvex(col: ImU32);
+    begin ImDrawList_PathFillConvex(@self, col) end;
+procedure TImDrawListHelper.PathStroke(col: ImU32; closed: bool; thickness: single);
+    begin ImDrawList_PathStroke(@self, col, closed, thickness) end;
+procedure TImDrawListHelper.PathArcTo(centre: ImVec2; radius: single; a_min: single; a_max: single; num_segments: longint);
+    begin ImDrawList_PathArcTo(@self, centre, radius, a_min, a_max, num_segments) end;
+{ Use precomputed angles for a 12 steps circle }
+procedure TImDrawListHelper.PathArcToFast(centre: ImVec2; radius: single; a_min_of_12: longint; a_max_of_12: longint);
+    begin ImDrawList_PathArcToFast(@self, centre, radius, a_min_of_12, a_max_of_12) end;
+procedure TImDrawListHelper.PathBezierCurveTo(p1: ImVec2; p2: ImVec2; p3: ImVec2; num_segments: longint);
+    begin ImDrawList_PathBezierCurveTo(@self, p1, p2, p3, num_segments) end;
+procedure TImDrawListHelper.PathRect(rect_min: ImVec2; rect_max: ImVec2; rounding: single; rounding_corners_flags: longint);
+    begin ImDrawList_PathRect(@self, rect_min, rect_max, rounding, rounding_corners_flags) end;
+
+{ Channels }
+procedure TImDrawListHelper.ChannelsSplit(channels_count: longint);
+    begin ImDrawList_ChannelsSplit(@self, channels_count) end;
+procedure TImDrawListHelper.ChannelsMerge();
+    begin ImDrawList_ChannelsMerge(@self) end;
+procedure TImDrawListHelper.ChannelsSetCurrent(channel_index: longint);
+    begin ImDrawList_ChannelsSetCurrent(@self, channel_index) end;
+
+{ Advanced }
+{ Your rendering function must check for 'UserCallback' in ImDrawCmd and call the function instead of rendering triangles. }
+procedure TImDrawListHelper.AddCallback(callback: ImDrawCallback; callback_data: pointer);
+    begin ImDrawList_AddCallback(@self, callback, callback_data) end;
+{ This is useful if you need to forcefully create a new draw call (to allow for dependent rendering / blending). Otherwise primitives are merged into the same draw-call as much as possible }
+procedure TImDrawListHelper.AddDrawCmd();
+    begin ImDrawList_AddDrawCmd(@self) end;
+
+{ Internal helpers }
+procedure TImDrawListHelper.PrimReserve(idx_count: longint; vtx_count: longint);
+    begin ImDrawList_PrimReserve(@self, idx_count, vtx_count) end;
+procedure TImDrawListHelper.PrimRect(a: ImVec2; b: ImVec2; col: ImU32);
+    begin ImDrawList_PrimRect(@self, a, b, col) end;
+procedure TImDrawListHelper.PrimRectUV(a: ImVec2; b: ImVec2; uv_a: ImVec2; uv_b: ImVec2; col: ImU32);
+    begin ImDrawList_PrimRectUV(@self, a, b, uv_a, uv_b, col) end;
+procedure TImDrawListHelper.PrimQuadUV(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; uv_a: ImVec2; uv_b: ImVec2; uv_c: ImVec2;  uv_d: ImVec2; col: ImU32);
+    begin ImDrawList_PrimQuadUV(@self, a, b, c, d, uv_a, uv_b, uv_c,  uv_d, col) end;
+procedure TImDrawListHelper.PrimWriteVtx(pos: ImVec2; uv: ImVec2; col: ImU32);
+    begin ImDrawList_PrimWriteVtx(@self, pos, uv, col) end;
+procedure TImDrawListHelper.PrimWriteIdx(idx: ImDrawIdx);
+    begin ImDrawList_PrimWriteIdx(@self, idx) end;
+procedure TImDrawListHelper.PrimVtx(pos: ImVec2; uv: ImVec2; col: ImU32);
+    begin ImDrawList_PrimVtx(@self, pos, uv, col) end;
+procedure TImDrawListHelper.UpdateClipRect();
+    begin ImDrawList_UpdateClipRect(@self) end;
+procedure TImDrawListHelper.UpdateTextureID();
+    begin ImDrawList_UpdateTextureID(@self) end;
 
 end.
