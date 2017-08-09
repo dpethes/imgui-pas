@@ -488,7 +488,7 @@ public
 
   { Layout }
   class procedure Separator;  inline;
-  class procedure SameLine(pos_x: single = 0; spacing_w: single = 0);  inline;
+  class procedure SameLine(pos_x: single = 0; spacing_w: single = -1);  inline;
   class procedure NewLine;  inline;
   class procedure Spacing;  inline;
   class procedure Dummy(size: PImVec2);  inline;
@@ -740,7 +740,7 @@ public
   class function  GetTime: single;  inline;
   class function  GetFrameCount: longint;  inline;
   class function  GetStyleColName(idx: ImGuiCol): PChar;  inline;
-  class procedure CalcItemRectClosestPoint(pOut: PImVec2; pos: ImVec2; on_edge: bool; outward: single);  inline;
+  class function  CalcItemRectClosestPoint(pos: ImVec2; on_edge: bool; outward: single): ImVec2; inline;
   class procedure CalcTextSize(pOut: PImVec2; _text: PChar; text_end: PChar; hide_text_after_double_hash: bool; wrap_width: single);  inline;
   class procedure CalcListClipping(items_count: longint; items_height: single; out_items_display_start: Plongint; out_items_display_end: Plongint);  inline;
 
@@ -762,12 +762,12 @@ public
   class function  IsMouseReleased(_button: longint): bool;  inline;
   class function  IsMouseHoveringWindow: bool;  inline;
   class function  IsMouseHoveringAnyWindow: bool;  inline;
-  class function  IsMouseHoveringRect(r_min: ImVec2; r_max: ImVec2; clip: bool): bool;  inline;
-  class function  IsMouseDragging(_button: longint; lock_threshold: single): bool;  inline;
-  class procedure GetMousePos(pOut: PImVec2);  inline;
-  class procedure GetMousePosOnOpeningCurrentPopup(pOut: PImVec2);  inline;
-  class procedure GetMouseDragDelta(pOut: PImVec2; _button: longint; lock_threshold: single);  inline;
-  class procedure ResetMouseDragDelta(_button: longint);  inline;
+  class function  IsMouseHoveringRect(r_min: ImVec2; r_max: ImVec2; clip: bool = true): bool; inline;
+  class function  IsMouseDragging(_button: longint = 0; lock_threshold: single = - 1): bool; inline;
+  class function  GetMousePos: ImVec2; inline;
+  class function  GetMousePosOnOpeningCurrentPopup: ImVec2; inline;
+  class function  GetMouseDragDelta(_button: longint = 0; lock_threshold: single = - 1): ImVec2; inline;
+  class procedure ResetMouseDragDelta(_button: longint = 0); inline;
   class function  GetMouseCursor: ImGuiMouseCursor;  inline;
   class procedure SetMouseCursor(_type: ImGuiMouseCursor);  inline;
   class procedure CaptureKeyboardFromApp(capture: bool);  inline;
@@ -1469,7 +1469,7 @@ class procedure ImGui.PopButtonRepeat;
 { Layout }
 class procedure ImGui.Separator;
     begin igSeparator end;
-class procedure ImGui.SameLine(pos_x: single = 0; spacing_w: single = 0);
+class procedure ImGui.SameLine(pos_x: single; spacing_w: single);
     begin igSameLine(pos_x, spacing_w) end;
 class procedure ImGui.NewLine;
     begin igNewLine end;
@@ -1876,8 +1876,8 @@ class function ImGui.GetFrameCount: longint;
     begin result := igGetFrameCount end;
 class function ImGui.GetStyleColName(idx: ImGuiCol): PChar;
     begin result := igGetStyleColName(idx) end;
-class procedure ImGui.CalcItemRectClosestPoint(pOut: PImVec2; pos: ImVec2; on_edge: bool; outward: single);
-    begin igCalcItemRectClosestPoint(pOut, pos, on_edge, outward) end;
+class function ImGui.CalcItemRectClosestPoint(pos: ImVec2; on_edge: bool; outward: single): ImVec2;
+    begin igCalcItemRectClosestPoint(@result, pos, on_edge, outward) end;
 class procedure ImGui.CalcTextSize(pOut: PImVec2; _text: PChar; text_end: PChar; hide_text_after_double_hash: bool;
   wrap_width: single);
     begin igCalcTextSize(pOut, _text, text_end, hide_text_after_double_hash, wrap_width) end;
@@ -1922,12 +1922,12 @@ class function ImGui.IsMouseHoveringRect(r_min: ImVec2; r_max: ImVec2; clip: boo
     begin result := igIsMouseHoveringRect(r_min, r_max, clip) end;
 class function ImGui.IsMouseDragging(_button: longint; lock_threshold: single): bool;
     begin result := igIsMouseDragging(_button, lock_threshold) end;
-class procedure ImGui.GetMousePos(pOut: PImVec2);
-    begin igGetMousePos(pOut) end;
-class procedure ImGui.GetMousePosOnOpeningCurrentPopup(pOut: PImVec2);
-    begin igGetMousePosOnOpeningCurrentPopup(pOut) end;
-class procedure ImGui.GetMouseDragDelta(pOut: PImVec2; _button: longint; lock_threshold: single);
-    begin igGetMouseDragDelta(pOut, _button, lock_threshold) end;
+class function ImGui.GetMousePos(): ImVec2;
+    begin igGetMousePos(@result) end;
+class function ImGui.GetMousePosOnOpeningCurrentPopup(): ImVec2;
+    begin igGetMousePosOnOpeningCurrentPopup(@result) end;
+class function ImGui.GetMouseDragDelta(_button: longint; lock_threshold: single): ImVec2;
+    begin igGetMouseDragDelta(@result, _button, lock_threshold) end;
 class procedure ImGui.ResetMouseDragDelta(_button: longint);
     begin igResetMouseDragDelta(_button) end;
 class function ImGui.GetMouseCursor: ImGuiMouseCursor;
