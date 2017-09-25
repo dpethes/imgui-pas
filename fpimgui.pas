@@ -49,6 +49,7 @@ type
   ImGuiID = ImU32;
   ImGuiCol = longint;
   ImGuiStyleVar = longint;
+  ImGuiColorEditFlags = longint;
   ImGuiKey = longint;
   ImGuiInputTextFlags = longint;
   ImGuiSelectableFlags = longint;
@@ -145,9 +146,9 @@ type
       ImGuiCol_Header,
       ImGuiCol_HeaderHovered,
       ImGuiCol_HeaderActive,
-      ImGuiCol_Column,
-      ImGuiCol_ColumnHovered,
-      ImGuiCol_ColumnActive,
+      ImGuiCol_Separator,
+      ImGuiCol_SeparatorHovered,
+      ImGuiCol_SeparatorActive,
       ImGuiCol_ResizeGrip,
       ImGuiCol_ResizeGripHovered,
       ImGuiCol_ResizeGripActive,
@@ -182,9 +183,37 @@ type
       //ImGuiStyleVar_Count_ - unnecessary
   );
 
-  // Enumeration for ColorEditMode()
-  // FIXME-OBSOLETE: Will be replaced by future color/picker api
-  ImGuiColorEditMode = longint;
+
+  ImGuiColorEditFlags_ = (
+      ImGuiColorEditFlags_NoAlpha         = 1 shl 1,
+      ImGuiColorEditFlags_NoPicker        = 1 shl 2,
+      ImGuiColorEditFlags_NoOptions       = 1 shl 3,
+      ImGuiColorEditFlags_NoSmallPreview  = 1 shl 4,
+      ImGuiColorEditFlags_NoInputs        = 1 shl 5,
+      ImGuiColorEditFlags_NoTooltip       = 1 shl 6,
+      ImGuiColorEditFlags_NoLabel         = 1 shl 7,
+      ImGuiColorEditFlags_NoSidePreview   = 1 shl 8,
+      // User Options (right-click on widget to change some of them). You can set application defaults using SetColorEditOptions().
+      // The idea is that you probably don't want to override them in most of your calls, let the user choose and/or call SetColorEditOptions() during startup.
+      ImGuiColorEditFlags_AlphaBar        = 1 shl 9,
+      ImGuiColorEditFlags_AlphaPreview    = 1 shl 10,
+      ImGuiColorEditFlags_AlphaPreviewHalf= 1 shl 11,
+      ImGuiColorEditFlags_HDR             = 1 shl 12,
+      ImGuiColorEditFlags_RGB             = 1 shl 13,
+      ImGuiColorEditFlags_HSV             = 1 shl 14,
+      ImGuiColorEditFlags_HEX             = 1 shl 15,
+      ImGuiColorEditFlags_Uint8           = 1 shl 16,
+      ImGuiColorEditFlags_Float           = 1 shl 17,
+      ImGuiColorEditFlags_PickerHueBar    = 1 shl 18,
+      ImGuiColorEditFlags_PickerHueWheel  = 1 shl 19
+      // Internals/Masks
+      {
+      ImGuiColorEditFlags__InputsMask     = ImGuiColorEditFlags_RGB|ImGuiColorEditFlags_HSV|ImGuiColorEditFlags_HEX,
+      ImGuiColorEditFlags__DataTypeMask   = ImGuiColorEditFlags_Uint8|ImGuiColorEditFlags_Float,
+      ImGuiColorEditFlags__PickerMask     = ImGuiColorEditFlags_PickerHueWheel|ImGuiColorEditFlags_PickerHueBar,
+      ImGuiColorEditFlags__OptionsDefault = ImGuiColorEditFlags_Uint8|ImGuiColorEditFlags_RGB|ImGuiColorEditFlags_PickerHueBar    // Change application default using SetColorEditOptions()
+      }
+  );
 
   // Enumeration for GetMouseCursor()
   ImGuiMouseCursor = longint;
@@ -201,13 +230,13 @@ type
   );
 
   // Condition flags for ImGui::SetWindow***(), SetNextWindow***(), SetNextTreeNode***() functions
-  // All those functions treat 0 as a shortcut to ImGuiSetCond_Always
-  ImGuiSetCond = longint;
-  ImGuiSetCondEnum = (
-      ImGuiSetCond_Always       = 1 shl 0, // Set the variable
-      ImGuiSetCond_Once         = 1 shl 1, // Set the variable once per runtime session (only the first call with succeed)
-      ImGuiSetCond_FirstUseEver = 1 shl 2, // Set the variable if the window has no saved data (if doesn't exist in the .ini file)
-      ImGuiSetCond_Appearing    = 1 shl 3  // Set the variable if the window is appearing after being hidden/inactive (or the first time)
+  // All those functions treat 0 as a shortcut to ImGuiCond_Always
+  ImGuiCond = longint;
+  ImGuiCondEnum = (
+      ImGuiCond_Always       = 1 shl 0, // Set the variable
+      ImGuiCond_Once         = 1 shl 1, // Set the variable once per runtime session (only the first call with succeed)
+      ImGuiCond_FirstUseEver = 1 shl 2, // Set the variable if the window has no saved data (if doesn't exist in the .ini file)
+      ImGuiCond_Appearing    = 1 shl 3  // Set the variable if the window is appearing after being hidden/inactive (or the first time)
   );
 
   { Structs }
@@ -435,21 +464,21 @@ public
   class function  GetWindowHeight: single;  inline;
   class function  IsWindowCollapsed: bool;  inline;
   class procedure SetWindowFontScale(scale: single);  inline;
-  class procedure SetNextWindowPos(pos: ImVec2; cond: ImGuiSetCond = 0);  inline;
-  class procedure SetNextWindowPosCenter(cond: ImGuiSetCond = 0);  inline;
-  class procedure SetNextWindowSize(size: ImVec2; cond: ImGuiSetCond = 0);  inline;
+  class procedure SetNextWindowPos(pos: ImVec2; cond: ImGuiCond = 0);  inline;
+  class procedure SetNextWindowPosCenter(cond: ImGuiCond = 0);  inline;
+  class procedure SetNextWindowSize(size: ImVec2; cond: ImGuiCond = 0);  inline;
   class procedure SetNextWindowSizeConstraints(size_min: ImVec2; size_max: ImVec2; custom_callback: ImGuiSizeConstraintCallback; custom_callback_data: pointer);  inline;
   class procedure SetNextWindowContentSize(size: ImVec2);  inline;
   class procedure SetNextWindowContentWidth(Width: single);  inline;
-  class procedure SetNextWindowCollapsed(collapsed: bool; cond: ImGuiSetCond = 0);  inline;
+  class procedure SetNextWindowCollapsed(collapsed: bool; cond: ImGuiCond = 0);  inline;
   class procedure SetNextWindowFocus;  inline;
-  class procedure SetWindowPos(pos: ImVec2; cond: ImGuiSetCond = 0);  inline;
-  class procedure SetWindowSize(size: ImVec2; cond: ImGuiSetCond = 0);  inline;
-  class procedure SetWindowCollapsed(collapsed: bool; cond: ImGuiSetCond = 0);  inline;
+  class procedure SetWindowPos(pos: ImVec2; cond: ImGuiCond = 0);  inline;
+  class procedure SetWindowSize(size: ImVec2; cond: ImGuiCond = 0);  inline;
+  class procedure SetWindowCollapsed(collapsed: bool; cond: ImGuiCond = 0);  inline;
   class procedure SetWindowFocus;  inline;
-  class procedure SetWindowPosByName(Name: PChar; pos: ImVec2; cond: ImGuiSetCond = 0);  inline;
-  class procedure SetWindowSize2(Name: PChar; size: ImVec2; cond: ImGuiSetCond = 0);  inline;
-  class procedure SetWindowCollapsed2(Name: PChar; collapsed: bool; cond: ImGuiSetCond = 0);  inline;
+  class procedure SetWindowPosByName(Name: PChar; pos: ImVec2; cond: ImGuiCond = 0);  inline;
+  class procedure SetWindowSize2(Name: PChar; size: ImVec2; cond: ImGuiCond = 0);  inline;
+  class procedure SetWindowCollapsed2(Name: PChar; collapsed: bool; cond: ImGuiCond = 0);  inline;
   class procedure SetWindowFocus2(Name: PChar);  inline;
   class function  GetScrollX: single;  inline;
   class function  GetScrollY: single;  inline;
@@ -520,6 +549,7 @@ public
   class function  GetColumnOffset(column_index: longint): single;  inline;
   class procedure SetColumnOffset(column_index: longint; offset_x: single);  inline;
   class function  GetColumnWidth(column_index: longint): single;  inline;
+  class procedure SetColumnWidth(column_index: longint; width: single);  inline;
   class function  GetColumnsCount: longint;  inline;
 
   { ID scopes }
@@ -572,12 +602,13 @@ public
   //todo : func type param
   //function  igCombo3(_label:Pchar; current_item:Plongint; items_getter:function (data:pointer; idx:longint; out_text:PPchar):bool; data:pointer; items_count:longint;
   //  height_in_items:longint):bool;cdecl;external ImguiLibName;
-  class function  ColorButton(col: ImVec4; small_height: bool; outline_border: bool): bool;  inline;
+  class function  ColorButton(desc_id: PChar; col: ImVec4; flags: ImGuiColorEditFlags; size: ImVec2): bool;  inline;
+  class function  ColorEdit3(_label: PChar; col: TCol3; flags: ImGuiColorEditFlags = 0): bool;  inline;
+  class function  ColorEdit4(_label: PChar; col: TCol4; flags: ImGuiColorEditFlags = 0): bool;  inline;
+  class function  ColorPicker3(_label: PChar; col: TCol3; flags: ImGuiColorEditFlags = 0): bool;  inline;
+  class function  ColorPicker4(_label: PChar; col: TCol4; flags: ImGuiColorEditFlags = 0): bool;  inline;
+  class procedure SetColorEditOptions(flags: ImGuiColorEditFlags);  inline;
 
-  class function  ColorEdit3(_label: PChar; col: TCol3): bool;  inline;
-  class function  ColorEdit4(_label: PChar; col: TCol4; show_alpha: bool): bool;  inline;
-
-  class procedure ColorEditMode(mode: ImGuiColorEditMode);  inline;
   class procedure PlotLines(_label: PChar; values: Psingle; values_count: longint; values_offset: longint; overlay_text: PChar; scale_min: single; scale_max: single; graph_size: ImVec2; stride: longint);  inline;
 
   //TODO : func type
@@ -654,7 +685,7 @@ public
   class procedure TreePop;  inline;
   class procedure TreeAdvanceToLabelPos;  inline;
   class function  GetTreeNodeToLabelSpacing: single;  inline;
-  class procedure SetNextTreeNodeOpen(opened: bool; cond: ImGuiSetCond = 0);  inline;
+  class procedure SetNextTreeNodeOpen(opened: bool; cond: ImGuiCond = 0);  inline;
   class function  CollapsingHeader(_label: PChar; flags: ImGuiTreeNodeFlags = 0): bool;  inline;
   class function  CollapsingHeader(_label: PChar; p_open: Pbool; flags: ImGuiTreeNodeFlags = 0): bool;  inline;
 
@@ -675,8 +706,6 @@ public
   class procedure ValueInt(prefix: PChar; v: longint);  inline;
   class procedure ValueUInt(prefix: PChar; v: dword);  inline;
   class procedure ValueFloat(prefix: PChar; v: single; float_format: PChar);  inline;
-  class procedure ValueColor(prefix: PChar; v: ImVec4);  inline;
-  class procedure ValueColor(prefix: PChar; v: ImU32); inline;
 
   { Tooltip }
   class procedure SetTooltip(fmt: string; args: array of const); {inline}
@@ -701,9 +730,10 @@ public
   class function  BeginPopup(str_id: PChar): bool;  inline;
   class function  BeginPopupModal(Name: PChar; p_open: Pbool; extra_flags: ImGuiWindowFlags): bool;  inline;
   class function  BeginPopupContextItem(str_id: PChar; mouse_button: longint): bool;  inline;
-  class function  BeginPopupContextWindow(also_over_items: bool; str_id: PChar; mouse_button: longint): bool;  inline;
+  class function  BeginPopupContextWindow(str_id: PChar = nil; mouse_button: longint = 1; also_over_items: bool = true): bool;  inline;
   class function  BeginPopupContextVoid(str_id: PChar; mouse_button: longint): bool;  inline;
   class procedure EndPopup;  inline;
+  class function  IsPopupOpen(str_id: PChar): bool;  inline;
   class procedure CloseCurrentPopup;  inline;
 
   { Logging: all text output from interface is redirected to tty/file/clipboard. Tree nodes are automatically opened. }
@@ -721,7 +751,7 @@ public
 
   { Utilities }
   class function  IsItemHovered: bool;  inline;
-  class function  IsItemHoveredRect: bool;  inline;
+  class function  IsItemRectHovered: bool;  inline;
   class function  IsItemActive: bool;  inline;
   class function  IsItemClicked(mouse_button: longint = 0): bool;  inline;
   class function  IsItemVisible: bool;  inline;
@@ -739,10 +769,9 @@ public
   class function  IsRectVisible(const item_size: ImVec2): bool;  inline;
   class function  IsRectVisible(const rect_min, rect_max: PImVec2): bool;  inline;
 
-  class function  IsPosHoveringAnyWindow(pos: ImVec2): bool;  inline;
   class function  GetTime: single;  inline;
   class function  GetFrameCount: longint;  inline;
-  class function  GetStyleColName(idx: ImGuiCol): PChar;  inline;
+  class function  GetStyleColorName(idx: ImGuiCol): PChar;  inline;
   class function  CalcItemRectClosestPoint(pos: ImVec2; on_edge: bool; outward: single): ImVec2; inline;
   class function  CalcTextSize(_text: PChar; text_end: PChar = nil; hide_text_after_double_hash: bool = false; wrap_width: single = -1): ImVec2; inline;
   class procedure CalcListClipping(items_count: longint; items_height: single; out_items_display_start: Plongint; out_items_display_end: Plongint);  inline;
@@ -763,8 +792,8 @@ public
   class function  IsMouseClicked(_button: longint; _repeat: bool): bool;  inline;
   class function  IsMouseDoubleClicked(_button: longint): bool;  inline;
   class function  IsMouseReleased(_button: longint): bool;  inline;
-  class function  IsMouseHoveringWindow: bool;  inline;
-  class function  IsMouseHoveringAnyWindow: bool;  inline;
+  class function  IsWindowRectHovered: bool;  inline;
+  class function  IsAnyWindowHovered: bool;  inline;
   class function  IsMouseHoveringRect(r_min: ImVec2; r_max: ImVec2; clip: bool = true): bool; inline;
   class function  IsMouseDragging(_button: longint = 0; lock_threshold: single = - 1): bool; inline;
   class function  GetMousePos: ImVec2; inline;
@@ -804,8 +833,8 @@ TImDrawListHelper = record helper for ImDrawList
 
   { Primitives }
   procedure AddLine(a: ImVec2; b: ImVec2; col: ImU32; thickness: single);  inline;
-  procedure AddRect(a: ImVec2; b: ImVec2; col: ImU32; rounding: single; rounding_corners_flags: longint; thickness: single);  inline;
-  procedure AddRectFilled(a: ImVec2; b: ImVec2; col: ImU32; rounding: single; rounding_corners_flags: longint);  inline;
+  procedure AddRect(a: ImVec2; b: ImVec2; col: ImU32; rounding: single = 0; rounding_corners_flags: longint = not 0; thickness: single = 1);  inline;
+  procedure AddRectFilled(a: ImVec2; b: ImVec2; col: ImU32; rounding: single = 0; rounding_corners_flags: longint = not 0);  inline;
   procedure AddRectFilledMultiColor(a: ImVec2; b: ImVec2; col_upr_left: ImU32; col_upr_right: ImU32;  col_bot_right: ImU32; col_bot_left: ImU32);  inline;
   procedure AddQuad(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; col: ImU32; thickness: single);  inline;
   procedure AddQuadFilled(a: ImVec2; b: ImVec2; c: ImVec2; d: ImVec2; col: ImU32);  inline;
@@ -892,21 +921,21 @@ function  igGetWindowHeight: single; cdecl; external ImguiLibName;
 function  igIsWindowCollapsed: bool; cdecl; external ImguiLibName;
 procedure igSetWindowFontScale(scale: single); cdecl; external ImguiLibName;
 
-procedure igSetNextWindowPos(pos: ImVec2; cond: ImGuiSetCond); cdecl; external ImguiLibName;
-procedure igSetNextWindowPosCenter(cond: ImGuiSetCond); cdecl; external ImguiLibName;
-procedure igSetNextWindowSize(size: ImVec2; cond: ImGuiSetCond); cdecl; external ImguiLibName;
+procedure igSetNextWindowPos(pos: ImVec2; cond: ImGuiCond); cdecl; external ImguiLibName;
+procedure igSetNextWindowPosCenter(cond: ImGuiCond); cdecl; external ImguiLibName;
+procedure igSetNextWindowSize(size: ImVec2; cond: ImGuiCond); cdecl; external ImguiLibName;
 procedure igSetNextWindowSizeConstraints(size_min: ImVec2; size_max: ImVec2; custom_callback: ImGuiSizeConstraintCallback; custom_callback_data: pointer); cdecl; external ImguiLibName;
 procedure igSetNextWindowContentSize(size: ImVec2); cdecl; external ImguiLibName;
 procedure igSetNextWindowContentWidth(Width: single); cdecl; external ImguiLibName;
-procedure igSetNextWindowCollapsed(collapsed: bool; cond: ImGuiSetCond); cdecl; external ImguiLibName;
+procedure igSetNextWindowCollapsed(collapsed: bool; cond: ImGuiCond); cdecl; external ImguiLibName;
 procedure igSetNextWindowFocus; cdecl; external ImguiLibName;
-procedure igSetWindowPos(pos: ImVec2; cond: ImGuiSetCond); cdecl; external ImguiLibName;
-procedure igSetWindowSize(size: ImVec2; cond: ImGuiSetCond); cdecl; external ImguiLibName;
-procedure igSetWindowCollapsed(collapsed: bool; cond: ImGuiSetCond); cdecl; external ImguiLibName;
+procedure igSetWindowPos(pos: ImVec2; cond: ImGuiCond); cdecl; external ImguiLibName;
+procedure igSetWindowSize(size: ImVec2; cond: ImGuiCond); cdecl; external ImguiLibName;
+procedure igSetWindowCollapsed(collapsed: bool; cond: ImGuiCond); cdecl; external ImguiLibName;
 procedure igSetWindowFocus; cdecl; external ImguiLibName;
-procedure igSetWindowPosByName(Name: PChar; pos: ImVec2; cond: ImGuiSetCond); cdecl; external ImguiLibName;
-procedure igSetWindowSize2(Name: PChar; size: ImVec2; cond: ImGuiSetCond); cdecl; external ImguiLibName;
-procedure igSetWindowCollapsed2(Name: PChar; collapsed: bool; cond: ImGuiSetCond); cdecl; external ImguiLibName;
+procedure igSetWindowPosByName(Name: PChar; pos: ImVec2; cond: ImGuiCond); cdecl; external ImguiLibName;
+procedure igSetWindowSize2(Name: PChar; size: ImVec2; cond: ImGuiCond); cdecl; external ImguiLibName;
+procedure igSetWindowCollapsed2(Name: PChar; collapsed: bool; cond: ImGuiCond); cdecl; external ImguiLibName;
 procedure igSetWindowFocus2(Name: PChar); cdecl; external ImguiLibName;
 
 function  igGetScrollX: single; cdecl; external ImguiLibName;
@@ -978,6 +1007,7 @@ function  igGetColumnIndex: longint; cdecl; external ImguiLibName;
 function  igGetColumnOffset(column_index: longint): single; cdecl; external ImguiLibName;
 procedure igSetColumnOffset(column_index: longint; offset_x: single); cdecl; external ImguiLibName;
 function  igGetColumnWidth(column_index: longint): single; cdecl; external ImguiLibName;
+procedure igSetColumnWidth(column_index: longint; width: single); cdecl; external ImguiLibName;
 function  igGetColumnsCount: longint; cdecl; external ImguiLibName;
 
 { ID scopes }
@@ -1029,12 +1059,13 @@ function  igCombo2(_label: PChar; current_item: Plongint; items_separated_by_zer
 //todo : func type param
 //function  igCombo3(_label:Pchar; current_item:Plongint; items_getter:function (data:pointer; idx:longint; out_text:PPchar):bool; data:pointer; items_count:longint;
 //  height_in_items:longint):bool;cdecl;external ImguiLibName;
-function  igColorButton(col: ImVec4; small_height: bool; outline_border: bool): bool; cdecl; external ImguiLibName;
+function  igColorButton(desc_id: PChar; col: ImVec4; flags: ImGuiColorEditFlags; size: ImVec2): bool; cdecl; external ImguiLibName;
+function  igColorEdit3(_label: PChar; col: TCol3; flags: ImGuiColorEditFlags = 0): bool; cdecl; external ImguiLibName;
+function  igColorEdit4(_label: PChar; col: TCol4; flags: ImGuiColorEditFlags = 0): bool; cdecl; external ImguiLibName;
+function  igColorPicker3(_label: PChar; col: TCol3; flags: ImGuiColorEditFlags = 0): bool; cdecl; external ImguiLibName;
+function  igColorPicker4(_label: PChar; col: TCol4; flags: ImGuiColorEditFlags = 0): bool; cdecl; external ImguiLibName;
+procedure igSetColorEditOptions(flags: ImGuiColorEditFlags); cdecl; external ImguiLibName;
 
-function  igColorEdit3(_label: PChar; col: TCol3): bool; cdecl; external ImguiLibName;
-function  igColorEdit4(_label: PChar; col: TCol4; show_alpha: bool): bool; cdecl; external ImguiLibName;
-
-procedure igColorEditMode(mode: ImGuiColorEditMode); cdecl; external ImguiLibName;
 procedure igPlotLines(_label: PChar; values: Psingle; values_count: longint; values_offset: longint; overlay_text: PChar; scale_min: single;
   scale_max: single; graph_size: ImVec2; stride: longint); cdecl; external ImguiLibName;
 
@@ -1118,7 +1149,7 @@ procedure igTreePushPtr(ptr_id: pointer); cdecl; external ImguiLibName;
 procedure igTreePop; cdecl; external ImguiLibName;
 procedure igTreeAdvanceToLabelPos; cdecl; external ImguiLibName;
 function  igGetTreeNodeToLabelSpacing: single; cdecl; external ImguiLibName;
-procedure igSetNextTreeNodeOpen(opened: bool; cond: ImGuiSetCond); cdecl; external ImguiLibName;
+procedure igSetNextTreeNodeOpen(opened: bool; cond: ImGuiCond); cdecl; external ImguiLibName;
 function  igCollapsingHeader(_label: PChar; flags: ImGuiTreeNodeFlags): bool; cdecl; external ImguiLibName;
 function  igCollapsingHeaderEx(_label: PChar; p_open: Pbool; flags: ImGuiTreeNodeFlags): bool; cdecl; external ImguiLibName;
 
@@ -1138,8 +1169,6 @@ procedure igValueBool(prefix: PChar; b: bool); cdecl; external ImguiLibName;
 procedure igValueInt(prefix: PChar; v: longint); cdecl; external ImguiLibName;
 procedure igValueUInt(prefix: PChar; v: dword); cdecl; external ImguiLibName;
 procedure igValueFloat(prefix: PChar; v: single; float_format: PChar); cdecl; external ImguiLibName;
-procedure igValueColor(prefix: PChar; v: ImVec4); cdecl; external ImguiLibName;
-procedure igValueColor2(prefix: PChar; v: ImU32); cdecl; external ImguiLibName;
 
 { Tooltip }
 procedure igSetTooltip(fmt: PChar; args: array of const); cdecl; external ImguiLibName;
@@ -1167,6 +1196,7 @@ function  igBeginPopupContextItem(str_id: PChar; mouse_button: longint): bool; c
 function  igBeginPopupContextWindow(also_over_items: bool; str_id: PChar; mouse_button: longint): bool; cdecl; external ImguiLibName;
 function  igBeginPopupContextVoid(str_id: PChar; mouse_button: longint): bool; cdecl; external ImguiLibName;
 procedure igEndPopup; cdecl; external ImguiLibName;
+function  igIsPopupOpen(str_id: PChar): bool; cdecl; external ImguiLibName;
 procedure igCloseCurrentPopup; cdecl; external ImguiLibName;
 
 { Logging: all text output from interface is redirected to tty/file/clipboard. Tree nodes are automatically opened. }
@@ -1184,7 +1214,7 @@ procedure igPopClipRect; cdecl; external ImguiLibName;
 
 { Utilities }
 function  igIsItemHovered: bool; cdecl; external ImguiLibName;
-function  igIsItemHoveredRect: bool; cdecl; external ImguiLibName;
+function  igIsItemRectHovered: bool; cdecl; external ImguiLibName;
 function  igIsItemActive: bool; cdecl; external ImguiLibName;
 function  igIsItemClicked(mouse_button: longint): bool; cdecl; external ImguiLibName;
 function  igIsItemVisible: bool; cdecl; external ImguiLibName;
@@ -1202,10 +1232,9 @@ function  igIsRootWindowOrAnyChildHovered: bool; cdecl; external ImguiLibName;
 function  igIsRectVisible(const item_size: ImVec2): bool; cdecl; external ImguiLibName;
 function  igIsRectVisible2(const rect_min, rect_max: PImVec2): bool; cdecl; external ImguiLibName;
 
-function  igIsPosHoveringAnyWindow(pos: ImVec2): bool; cdecl; external ImguiLibName;
 function  igGetTime: single; cdecl; external ImguiLibName;
 function  igGetFrameCount: longint; cdecl; external ImguiLibName;
-function  igGetStyleColName(idx: ImGuiCol): PChar; cdecl; external ImguiLibName;
+function  igGetStyleColorName(idx: ImGuiCol): PChar; cdecl; external ImguiLibName;
 procedure igCalcItemRectClosestPoint(pOut: PImVec2; pos: ImVec2; on_edge: bool; outward: single); cdecl; external ImguiLibName;
 procedure igCalcTextSize(pOut: PImVec2; Text: PChar; text_end: PChar; hide_text_after_double_hash: bool; wrap_width: single); cdecl; external ImguiLibName;
 procedure igCalcListClipping(items_count: longint; items_height: single; out_items_display_start: Plongint; out_items_display_end: Plongint); cdecl; external ImguiLibName;
@@ -1226,8 +1255,8 @@ function  igIsMouseDown(button: longint): bool; cdecl; external ImguiLibName;
 function  igIsMouseClicked(button: longint; _repeat: bool): bool; cdecl; external ImguiLibName;
 function  igIsMouseDoubleClicked(button: longint): bool; cdecl; external ImguiLibName;
 function  igIsMouseReleased(button: longint): bool; cdecl; external ImguiLibName;
-function  igIsMouseHoveringWindow: bool; cdecl; external ImguiLibName;
-function  igIsMouseHoveringAnyWindow: bool; cdecl; external ImguiLibName;
+function  igIsWindowRectHovered: bool; cdecl; external ImguiLibName;
+function  igIsAnyWindowHovered: bool; cdecl; external ImguiLibName;
 function  igIsMouseHoveringRect(r_min: ImVec2; r_max: ImVec2; clip: bool): bool; cdecl; external ImguiLibName;
 function  igIsMouseDragging(button: longint; lock_threshold: single): bool; cdecl; external ImguiLibName;
 procedure igGetMousePos(pOut: PImVec2); cdecl; external ImguiLibName;
@@ -1437,11 +1466,11 @@ class function ImGui.IsWindowCollapsed: bool;
     begin result := igIsWindowCollapsed end;
 class procedure ImGui.SetWindowFontScale(scale: single);
     begin igSetWindowFontScale(scale) end;
-class procedure ImGui.SetNextWindowPos(pos: ImVec2; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetNextWindowPos(pos: ImVec2; cond: ImGuiCond = 0);
     begin igSetNextWindowPos(pos, cond) end;
-class procedure ImGui.SetNextWindowPosCenter(cond: ImGuiSetCond = 0);
+class procedure ImGui.SetNextWindowPosCenter(cond: ImGuiCond = 0);
     begin igSetNextWindowPosCenter(cond) end;
-class procedure ImGui.SetNextWindowSize(size: ImVec2; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetNextWindowSize(size: ImVec2; cond: ImGuiCond = 0);
     begin igSetNextWindowSize(size, cond) end;
 class procedure ImGui.SetNextWindowSizeConstraints(size_min: ImVec2; size_max: ImVec2; custom_callback: ImGuiSizeConstraintCallback; custom_callback_data: pointer);
     begin igSetNextWindowSizeConstraints(size_min, size_max, custom_callback, custom_callback_data) end;
@@ -1449,23 +1478,23 @@ class procedure ImGui.SetNextWindowContentSize(size: ImVec2);
     begin igSetNextWindowContentSize(size) end;
 class procedure ImGui.SetNextWindowContentWidth(Width: single);
     begin igSetNextWindowContentWidth(Width) end;
-class procedure ImGui.SetNextWindowCollapsed(collapsed: bool; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetNextWindowCollapsed(collapsed: bool; cond: ImGuiCond = 0);
     begin igSetNextWindowCollapsed(collapsed, cond) end;
 class procedure ImGui.SetNextWindowFocus;
     begin igSetNextWindowFocus end;
-class procedure ImGui.SetWindowPos(pos: ImVec2; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetWindowPos(pos: ImVec2; cond: ImGuiCond = 0);
     begin igSetWindowPos(pos, cond) end;
-class procedure ImGui.SetWindowSize(size: ImVec2; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetWindowSize(size: ImVec2; cond: ImGuiCond = 0);
     begin igSetWindowSize(size, cond) end;
-class procedure ImGui.SetWindowCollapsed(collapsed: bool; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetWindowCollapsed(collapsed: bool; cond: ImGuiCond = 0);
     begin igSetWindowCollapsed(collapsed, cond) end;
 class procedure ImGui.SetWindowFocus;
     begin igSetWindowFocus end;
-class procedure ImGui.SetWindowPosByName(Name: PChar; pos: ImVec2; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetWindowPosByName(Name: PChar; pos: ImVec2; cond: ImGuiCond = 0);
     begin igSetWindowPosByName(Name, pos, cond) end;
-class procedure ImGui.SetWindowSize2(Name: PChar; size: ImVec2; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetWindowSize2(Name: PChar; size: ImVec2; cond: ImGuiCond = 0);
     begin igSetWindowSize2(Name, size, cond) end;
-class procedure ImGui.SetWindowCollapsed2(Name: PChar; collapsed: bool; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetWindowCollapsed2(Name: PChar; collapsed: bool; cond: ImGuiCond = 0);
     begin igSetWindowCollapsed2(Name, collapsed, cond) end;
 class procedure ImGui.SetWindowFocus2(Name: PChar);
     begin igSetWindowFocus2(Name) end;
@@ -1599,6 +1628,8 @@ class procedure ImGui.SetColumnOffset(column_index: longint; offset_x: single);
     begin igSetColumnOffset(column_index, offset_x) end;
 class function ImGui.GetColumnWidth(column_index: longint): single;
     begin result := igGetColumnWidth(column_index) end;
+class procedure ImGui.SetColumnWidth(column_index: longint; width: single);
+    begin igSetColumnWidth(column_index, width); end;
 class function ImGui.GetColumnsCount: longint;
     begin result := igGetColumnsCount end;
 
@@ -1678,16 +1709,19 @@ class function ImGui.Combo(_label: PChar; current_item: Plongint; items: PPchar;
 class function ImGui.Combo2(_label: PChar; current_item: Plongint; items_separated_by_zeros: PChar; height_in_items: longint): bool;
     begin result := igCombo2(_label, current_item, items_separated_by_zeros, height_in_items) end;
 
-class function ImGui.ColorButton(col: ImVec4; small_height: bool; outline_border: bool): bool;
-    begin result := igColorButton(col, small_height, outline_border) end;
+class function ImGui.ColorButton(desc_id: PChar; col: ImVec4; flags: ImGuiColorEditFlags; size: ImVec2): bool;
+    begin result := igColorButton(desc_id, col, flags, size) end;
+class function ImGui.ColorEdit3(_label: PChar; col: TCol3; flags: ImGuiColorEditFlags): bool;
+    begin result := igColorEdit3(_label, col, flags) end;
+class function ImGui.ColorEdit4(_label: PChar; col: TCol4; flags: ImGuiColorEditFlags): bool;
+    begin result := igColorEdit4(_label, col, flags) end;
+class function ImGui.ColorPicker3(_label: PChar; col: TCol3; flags: ImGuiColorEditFlags): bool;
+    begin result := igColorPicker3(_label, col, flags) end;
+class function ImGui.ColorPicker4(_label: PChar; col: TCol4; flags: ImGuiColorEditFlags): bool;
+    begin result := igColorPicker4(_label, col, flags) end;
+class procedure ImGui.SetColorEditOptions(flags: ImGuiColorEditFlags);
+    begin igSetColorEditOptions(flags) end;
 
-class function ImGui.ColorEdit3(_label: PChar; col: TCol3): bool;
-    begin result := igColorEdit3(_label, col) end;
-class function ImGui.ColorEdit4(_label: PChar; col: TCol4; show_alpha: bool): bool;
-    begin result := igColorEdit4(_label, col, show_alpha) end;
-
-class procedure ImGui.ColorEditMode(mode: ImGuiColorEditMode);
-    begin igColorEditMode(mode) end;
 class procedure ImGui.PlotLines(_label: PChar; values: Psingle; values_count: longint; values_offset: longint; overlay_text: PChar; scale_min: single; scale_max: single; graph_size: ImVec2; stride: longint);
     begin igPlotLines(_label, values, values_count, values_offset, overlay_text, scale_min, scale_max, graph_size, stride) end;
 
@@ -1800,7 +1834,7 @@ class procedure ImGui.TreeAdvanceToLabelPos;
     begin igTreeAdvanceToLabelPos end;
 class function ImGui.GetTreeNodeToLabelSpacing: single;
     begin result := igGetTreeNodeToLabelSpacing end;
-class procedure ImGui.SetNextTreeNodeOpen(opened: bool; cond: ImGuiSetCond = 0);
+class procedure ImGui.SetNextTreeNodeOpen(opened: bool; cond: ImGuiCond = 0);
     begin igSetNextTreeNodeOpen(opened, cond) end;
 class function ImGui.CollapsingHeader(_label: PChar; flags: ImGuiTreeNodeFlags): bool;
     begin result := igCollapsingHeader(_label, flags) end;
@@ -1832,10 +1866,6 @@ class procedure ImGui.ValueUInt(prefix: PChar; v: dword);
     begin igValueUInt(prefix, v) end;
 class procedure ImGui.ValueFloat(prefix: PChar; v: single; float_format: PChar);
     begin igValueFloat(prefix, v, float_format) end;
-class procedure ImGui.ValueColor(prefix: PChar; v: ImVec4);
-    begin igValueColor(prefix, v) end;
-class procedure ImGui.ValueColor(prefix: PChar; v: ImU32);
-    begin igValueColor2(prefix, v) end;
 
 { Tooltip }
 class procedure ImGui.SetTooltip(fmt: string; args: array of const);
@@ -1874,12 +1904,14 @@ class function ImGui.BeginPopupModal(Name: PChar; p_open: Pbool; extra_flags: Im
     begin result := igBeginPopupModal(Name, p_open, extra_flags) end;
 class function ImGui.BeginPopupContextItem(str_id: PChar; mouse_button: longint): bool;
     begin result := igBeginPopupContextItem(str_id, mouse_button) end;
-class function ImGui.BeginPopupContextWindow(also_over_items: bool; str_id: PChar; mouse_button: longint): bool;
+class function ImGui.BeginPopupContextWindow(str_id: PChar; mouse_button: longint; also_over_items: bool): bool;
     begin result := igBeginPopupContextWindow(also_over_items, str_id, mouse_button) end;
 class function ImGui.BeginPopupContextVoid(str_id: PChar; mouse_button: longint): bool;
     begin result := igBeginPopupContextVoid(str_id, mouse_button) end;
 class procedure ImGui.EndPopup;
     begin igEndPopup end;
+class function ImGui.IsPopupOpen(str_id: PChar): bool;
+    begin result := igIsPopupOpen(str_id); end;
 class procedure ImGui.CloseCurrentPopup;
     begin igCloseCurrentPopup end;
 
@@ -1908,8 +1940,8 @@ class procedure ImGui.PopClipRect;
 { Utilities }
 class function ImGui.IsItemHovered: bool;
     begin result := igIsItemHovered end;
-class function ImGui.IsItemHoveredRect: bool;
-    begin result := igIsItemHoveredRect end;
+class function ImGui.IsItemRectHovered: bool;
+    begin result := igIsItemRectHovered end;
 class function ImGui.IsItemActive: bool;
     begin result := igIsItemActive end;
 class function ImGui.IsItemClicked(mouse_button: longint): bool;
@@ -1942,14 +1974,12 @@ class function ImGui.IsRectVisible(const item_size: ImVec2): bool;
     begin result := igIsRectVisible(item_size) end;
 class function ImGui.IsRectVisible(const rect_min, rect_max: PImVec2): bool;
     begin result := igIsRectVisible2(rect_min, rect_max) end;
-class function ImGui.IsPosHoveringAnyWindow(pos: ImVec2): bool;
-    begin result := igIsPosHoveringAnyWindow(pos) end;
 class function ImGui.GetTime: single;
     begin result := igGetTime end;
 class function ImGui.GetFrameCount: longint;
     begin result := igGetFrameCount end;
-class function ImGui.GetStyleColName(idx: ImGuiCol): PChar;
-    begin result := igGetStyleColName(idx) end;
+class function ImGui.GetStyleColorName(idx: ImGuiCol): PChar;
+    begin result := igGetStyleColorName(idx) end;
 class function ImGui.CalcItemRectClosestPoint(pos: ImVec2; on_edge: bool; outward: single): ImVec2;
     begin igCalcItemRectClosestPoint(@result, pos, on_edge, outward) end;
 class function ImGui.CalcTextSize(_text: PChar; text_end: PChar; hide_text_after_double_hash: bool; wrap_width: single): ImVec2;
@@ -1987,10 +2017,10 @@ class function ImGui.IsMouseDoubleClicked(_button: longint): bool;
     begin result := igIsMouseDoubleClicked(_button) end;
 class function ImGui.IsMouseReleased(_button: longint): bool;
     begin result := igIsMouseReleased(_button) end;
-class function ImGui.IsMouseHoveringWindow: bool;
-    begin result := igIsMouseHoveringWindow end;
-class function ImGui.IsMouseHoveringAnyWindow: bool;
-    begin result := igIsMouseHoveringAnyWindow end;
+class function ImGui.IsWindowRectHovered: bool;
+    begin result := igIsWindowRectHovered; end;
+class function ImGui.IsAnyWindowHovered: bool;
+    begin result := igIsAnyWindowHovered; end;
 class function ImGui.IsMouseHoveringRect(r_min: ImVec2; r_max: ImVec2; clip: bool): bool;
     begin result := igIsMouseHoveringRect(r_min, r_max, clip) end;
 class function ImGui.IsMouseDragging(_button: longint; lock_threshold: single): bool;

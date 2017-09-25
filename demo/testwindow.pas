@@ -182,7 +182,7 @@ begin
   if (no_scrollbar)  then window_flags := window_flags or ord(ImGuiWindowFlags_NoScrollbar);
   if (no_collapse)   then window_flags := window_flags or ord(ImGuiWindowFlags_NoCollapse);
   if (not no_menu)   then window_flags := window_flags or ord(ImGuiWindowFlags_MenuBar);
-  ImGui.SetNextWindowSize(ImVec2Init(550,680), ord(ImGuiSetCond_FirstUseEver));
+  ImGui.SetNextWindowSize(ImVec2Init(550,680), ord(ImGuiCond_FirstUseEver));
   if not ImGui.Begin_('ImGui Demo (translated version)', @p_open, window_flags) then begin
       // Early out if the window is collapsed, as an optimization.
       ImGui.End_;

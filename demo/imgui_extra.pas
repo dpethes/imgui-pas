@@ -64,9 +64,9 @@ begin
   style^.Colors[ImGuiCol_Header] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.76 );
   style^.Colors[ImGuiCol_HeaderHovered] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.86 );
   style^.Colors[ImGuiCol_HeaderActive] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 1.00 );
-  style^.Colors[ImGuiCol_Column] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.32 );
-  style^.Colors[ImGuiCol_ColumnHovered] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.78 );
-  style^.Colors[ImGuiCol_ColumnActive] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 1.00 );
+  style^.Colors[ImGuiCol_Separator] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.32 );
+  style^.Colors[ImGuiCol_SeparatorHovered] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.78 );
+  style^.Colors[ImGuiCol_SeparatorActive] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 1.00 );
   style^.Colors[ImGuiCol_ResizeGrip] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.15 );
   style^.Colors[ImGuiCol_ResizeGripHovered] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.78 );
   style^.Colors[ImGuiCol_ResizeGripActive] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 1.00 );

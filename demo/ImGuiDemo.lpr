@@ -13,23 +13,45 @@ var
   testwin_open: boolean = true;
 
 procedure ShowGreetingWindows;
+var
+  draw_list: PImDrawList;
+  pos: ImVec2;
 begin
   ImGui.Begin_('Greeting');
-  ImGui.SetWindowPos(ImVec2Init(100,100), ord(ImGuiSetCond_FirstUseEver));
-  ImGui.Text('Hello, world %d', [counter]);
-  if ImGui.Button('OK') then begin
-      //button was pressed, do something special!
-      Inc(counter);
-  end;
+    ImGui.SetWindowPos(ImVec2Init(100,100), ord(ImGuiCond_FirstUseEver));
+    ImGui.Text('Hello, world %d', [counter]);
+    if ImGui.Button('OK') then begin
+        //button was pressed, do something special!
+        Inc(counter);
+    end;
+    if ImGui.IsItemRectHovered then begin
+        ImGui.SameLine();
+        ImGui.Text('button hovered');
+    end;
+
+    ImGui.SameLine();
+    pos := ImGui.GetCursorScreenPos();
+    draw_list := ImGui.GetWindowDrawList();
+    draw_list^.AddRectFilled(pos, ImVec2Init(pos.x + 50, pos.y + 25), $88000055);
+
+    pos := ImVec2Init(pos.x + 50 + 20, pos.y);
+    ImGui.SetCursorScreenPos(pos);
+
+    draw_list^.AddRectFilled(pos, ImVec2Init(pos.x + ImGui.CalcTextSize(pchar('custom rectangles')).x, pos.y + 25), $88005500);
+    ImGui.Text('custom rectangles');
+    if ImGui.IsWindowRectHovered then
+        ImGui.Text('window hovered')
+    else if ImGui.IsAnyWindowHovered then
+        ImGui.Text('some window hovered');
   ImGui.End_;
 
-  //same version, cimgui interface
+  //cimgui interface
   igBegin('Another greeting');
-  igSetWindowPos(ImVec2Init(400,200), ord(ImGuiSetCond_FirstUseEver));
-  igText('Hello, next world %d', [counter]);
-  if igButton('Not OK!', ImVec2Init(0,0)) then begin
-      Dec(counter);
-  end;
+    igSetWindowPos(ImVec2Init(400,200), ord(ImGuiCond_FirstUseEver));
+    igText('Hello, next world %d', [counter]);
+    if igButton('Not OK!', ImVec2Init(0,0)) then begin
+        Dec(counter);
+    end;
   igEnd;
 end;
 
@@ -54,7 +76,7 @@ begin
       //draw your scene and use imgui
       //(do some opengl calls...)
 
-      //ShowGreetingWindows;        //simple windows
+      ShowGreetingWindows;        //simple windows
       ImGui.ShowTestWindow();     //integrated demo: shows just about everything that it can do. See imgui_demo.cpp
       testwin.Show(testwin_open); //partially translated demo
 
