@@ -1772,7 +1772,7 @@ class function ImGui.DragFloat3(_label: PChar; v: TFloat3; v_speed: single; v_mi
     begin result := igDragFloat3(_label, v, v_speed, v_min, v_max, display_format, power) end;
 class function ImGui.DragFloat4(_label: PChar; v: TFloat4; v_speed: single; v_min: single; v_max: single; display_format: PChar; power: single): bool;
     begin result := igDragFloat4(_label, v, v_speed, v_min, v_max, display_format, power) end;
-class function ImGui.DragFloatRange2(_label: PChar; v_current_min: Psingle; v_current_max: Psingle; v_speed: single; v_min: single; v_max: single;   display_format: PChar; display_format_max: PChar; power: single): bool;
+class function ImGui.DragFloatRange2(_label: PChar; v_current_min: Psingle; v_current_max: Psingle; v_speed: single; v_min: single; v_max: single; display_format: PChar; display_format_max: PChar; power: single): bool;
     begin result := igDragFloatRange2(_label, v_current_min, v_current_max, v_speed, v_min, v_max,   display_format, display_format_max, power) end;
 { If v_max >= v_max we have no bound }
 class function ImGui.DragInt(_label: PChar; v: Plongint; v_speed: single; v_min: longint; v_max: longint; display_format: PChar): bool;
@@ -1783,13 +1783,13 @@ class function ImGui.DragInt3(_label: PChar; v: TLongInt3; v_speed: single; v_mi
     begin result := igDragInt3(_label, v, v_speed, v_min, v_max, display_format) end;
 class function ImGui.DragInt4(_label: PChar; v: TLongInt4; v_speed: single; v_min: longint; v_max: longint; display_format: PChar): bool;
     begin result := igDragInt4(_label, v, v_speed, v_min, v_max, display_format) end;
-class function ImGui.DragIntRange2(_label: PChar; v_current_min: Plongint; v_current_max: Plongint; v_speed: single; v_min: longint; v_max: longint;   display_format: PChar; display_format_max: PChar): bool;
+class function ImGui.DragIntRange2(_label: PChar; v_current_min: Plongint; v_current_max: Plongint; v_speed: single; v_min: longint; v_max: longint; display_format: PChar; display_format_max: PChar): bool;
     begin result := igDragIntRange2(_label, v_current_min, v_current_max, v_speed, v_min, v_max,   display_format, display_format_max) end;
 
 { Widgets: Input }
-class function ImGui.InputText(_label: PChar; buf: PChar; buf_size: size_t; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback;   user_data: pointer): bool;
+class function ImGui.InputText(_label: PChar; buf: PChar; buf_size: size_t; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback; user_data: pointer): bool;
     begin result := igInputText(_label, buf, buf_size, flags, callback,   user_data) end;
-class function ImGui.InputTextMultiline(_label: PChar; buf: PChar; buf_size: size_t; size: ImVec2; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback;   user_data: pointer): bool;
+class function ImGui.InputTextMultiline(_label: PChar; buf: PChar; buf_size: size_t; size: ImVec2; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback; user_data: pointer): bool;
     begin result := igInputTextMultiline(_label, buf, buf_size, size, flags, callback,   user_data) end;
 class function ImGui.InputFloat(_label: PChar; v: Psingle; step: single; step_fast: single; decimal_precision: longint; extra_flags: ImGuiInputTextFlags): bool;
     begin result := igInputFloat(_label, v, step, step_fast, decimal_precision, extra_flags) end;
