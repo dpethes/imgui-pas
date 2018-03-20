@@ -79,26 +79,26 @@ var
   font_atlas: PImFontAtlas;
   last_texture: GLint;
 begin
-    // Build texture atlas
-    io := igGetIO();
-    font_atlas := io^.Fonts;
-    //ImFontAtlas_AddFontDefault(font_atlas);
-    ImFontAtlas_GetTexDataAsAlpha8(font_atlas, @pixels, @width, @height);
+  // Build texture atlas
+  io := igGetIO();
+  font_atlas := io^.Fonts;
+  //ImFontAtlas_AddFontDefault(font_atlas);
+  ImFontAtlas_GetTexDataAsAlpha8(font_atlas, @pixels, @width, @height);
 
-    // Upload texture to graphics system
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, @last_texture);
-    glGenTextures(1, @g_FontTexture);
-    glBindTexture(GL_TEXTURE_2D, g_FontTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
+  // Upload texture to graphics system
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, @last_texture);
+  glGenTextures(1, @g_FontTexture);
+  glBindTexture(GL_TEXTURE_2D, g_FontTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
 
-    // Store our identifier
-    ImFontAtlas_SetTexID(font_atlas, ImTextureID(g_FontTexture));
+  // Store our identifier
+  ImFontAtlas_SetTexID(font_atlas, ImTextureID(g_FontTexture));
 
-    // Restore state
-    glBindTexture(GL_TEXTURE_2D, last_texture);
+  // Restore state
+  glBindTexture(GL_TEXTURE_2D, last_texture);
 end;
 
 procedure ImGui_ImplSdlGL2_InvalidateDeviceObjects();
@@ -161,8 +161,8 @@ end;
 
 procedure ImGui_ImplSdlGL2_Shutdown();
 begin
-    ImGui_ImplSdlGL2_InvalidateDeviceObjects();
-    igShutdown();
+  ImGui_ImplSdlGL2_InvalidateDeviceObjects();
+  igShutdown();
 end;
 
 procedure ImGui_ImplSdlGL2_NewFrame(window: PSDL_Window);
@@ -174,54 +174,54 @@ var
   current_time: double;
   mx, my: Integer;
 begin
-    if g_FontTexture = 0 then
-        ImGui_ImplSdlGL2_CreateDeviceObjects();
+  if g_FontTexture = 0 then
+      ImGui_ImplSdlGL2_CreateDeviceObjects();
 
-    io := igGetIO();
+  io := igGetIO();
 
-    // Setup display size (every frame to accommodate for window resizing)
-    SDL_GetWindowSize(window, @w, @h);
-    io^.DisplaySize := ImVec2Init(w, h);
-    io^.DisplayFramebufferScale := ImVec2Init(1, 1);
+  // Setup display size (every frame to accommodate for window resizing)
+  SDL_GetWindowSize(window, @w, @h);
+  io^.DisplaySize := ImVec2Init(w, h);
+  io^.DisplayFramebufferScale := ImVec2Init(1, 1);
 
-    // SDL_GL_GetDrawableSize might be missing in pascal sdl2 headers - remove the next 3 lines in that case
-    SDL_GL_GetDrawableSize(window, @display_w, @display_h);
-    if (w <> 0) and (h <> 0) and ((w <> display_w) or (h <> display_h)) then
-        io^.DisplayFramebufferScale := ImVec2Init(display_w/w, display_h/h);
+  // SDL_GL_GetDrawableSize might be missing in pascal sdl2 headers - remove the next 3 lines in that case
+  SDL_GL_GetDrawableSize(window, @display_w, @display_h);
+  if (w <> 0) and (h <> 0) and ((w <> display_w) or (h <> display_h)) then
+      io^.DisplayFramebufferScale := ImVec2Init(display_w/w, display_h/h);
 
-    // Setup time step
-    time := SDL_GetTicks();
-    current_time := time / 1000.0;
-    if (g_Time > 0.0) then
-        io^.DeltaTime := current_time - g_Time
-    else
-        io^.DeltaTime := 1.0/60.0;
-    g_Time := current_time;
+  // Setup time step
+  time := SDL_GetTicks();
+  current_time := time / 1000.0;
+  if (g_Time > 0.0) then
+      io^.DeltaTime := current_time - g_Time
+  else
+      io^.DeltaTime := 1.0/60.0;
+  g_Time := current_time;
 
-    // Setup inputs
-    // (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
-    mouseMask := SDL_GetMouseState(@mx, @my);
-    if ((SDL_GetWindowFlags(window) and SDL_WINDOW_MOUSE_FOCUS) <> 0) then
-        io^.MousePos := ImVec2Init(mx, my)   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
-    else
-        io^.MousePos := ImVec2Init(-1,-1);
+  // Setup inputs
+  // (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
+  mouseMask := SDL_GetMouseState(@mx, @my);
+  if ((SDL_GetWindowFlags(window) and SDL_WINDOW_MOUSE_FOCUS) <> 0) then
+      io^.MousePos := ImVec2Init(mx, my)   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
+  else
+      io^.MousePos := ImVec2Init(-1,-1);
 
-    // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-    io^.MouseDown[0] := g_MousePressed[0] or (mouseMask and SDL_BUTTON(SDL_BUTTON_LEFT) <> 0);
-    io^.MouseDown[1] := g_MousePressed[1] or (mouseMask and SDL_BUTTON(SDL_BUTTON_RIGHT) <> 0);
-    io^.MouseDown[2] := g_MousePressed[2] or (mouseMask and SDL_BUTTON(SDL_BUTTON_MIDDLE) <> 0);
-    g_MousePressed[0] := false;
-    g_MousePressed[1] := false;
-    g_MousePressed[2] := false;
+  // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+  io^.MouseDown[0] := g_MousePressed[0] or (mouseMask and SDL_BUTTON(SDL_BUTTON_LEFT) <> 0);
+  io^.MouseDown[1] := g_MousePressed[1] or (mouseMask and SDL_BUTTON(SDL_BUTTON_RIGHT) <> 0);
+  io^.MouseDown[2] := g_MousePressed[2] or (mouseMask and SDL_BUTTON(SDL_BUTTON_MIDDLE) <> 0);
+  g_MousePressed[0] := false;
+  g_MousePressed[1] := false;
+  g_MousePressed[2] := false;
 
-    io^.MouseWheel := g_MouseWheel;
-    g_MouseWheel := 0.0;
+  io^.MouseWheel := g_MouseWheel;
+  g_MouseWheel := 0.0;
 
-    // Hide OS mouse cursor if ImGui is drawing it
-    if io^.MouseDrawCursor then SDL_ShowCursor(SDL_DISABLE) else SDL_ShowCursor(SDL_ENABLE);
+  // Hide OS mouse cursor if ImGui is drawing it
+  if io^.MouseDrawCursor then SDL_ShowCursor(SDL_DISABLE) else SDL_ShowCursor(SDL_ENABLE);
 
-    // Start the frame
-    igNewFrame();
+  // Start the frame
+  igNewFrame();
 end;
 
 procedure Imgui_ImplSdlGL2_RenderDrawLists(draw_data: PImDrawData); cdecl;
