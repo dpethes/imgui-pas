@@ -8,28 +8,28 @@ interface
 
 uses
   sysutils,
-  sdl2, gl, glu,
+  sdl2, glad_gl,
   fpimgui, fpimgui_impl_sdlgl2;
   
 type
   { TDisplay }
   TDisplay = class
     public
-      procedure InitDisplay(const width, height: word);
+      procedure InitDisplay(const width, height: word; fullscreen: boolean = false);
       procedure FreeDisplay;
       procedure SetWindowCaption(caption: string);
 
       procedure NewFrame;
-      procedure DrawFrame;
+      procedure PresentFrame;
 
     private
-      w, h: word;
       window: PSDL_Window;
-      in_frame: boolean;
       context: TSDL_GLContext;
+      w, h: integer;
+      in_frame: boolean;
 
       procedure InitGui;
-      procedure InitRenderingContext(const height: word; const width: word);
+      procedure InitRenderingContext(const width, height: integer; fullscreen: boolean);
   end;
   
   
@@ -37,20 +37,25 @@ type
 *******************************************************************************) 
 implementation
 
+function GLFuncLoad(proc: Pchar): Pointer;
+begin
+  result := SDL_GL_GetProcAddress(proc);
+  Assert(result <> nil, 'couldn''t load ' + proc);
+end;
 
 { TDisplay }
 
-procedure TDisplay.InitDisplay (const width, height: word );
+procedure TDisplay.InitDisplay(const width, height: word; fullscreen: boolean);
 begin
   if (SDL_WasInit(SDL_INIT_VIDEO) and SDL_INIT_VIDEO) = 0 then begin
       writeln('SDL video was not init, initializing now');
       SDL_InitSubSystem(SDL_INIT_VIDEO);
   end;
-  InitRenderingContext(height, width);
+  InitRenderingContext(width, height, fullscreen);
   InitGui();
 end;
 
-procedure TDisplay.InitRenderingContext(const height: word; const width: word);
+procedure TDisplay.InitRenderingContext(const width, height: integer; fullscreen: boolean);
 var
   y: integer;
   x: integer;
@@ -63,12 +68,15 @@ begin
   SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
   SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
   SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,   8);
+  SDL_GL_LoadLibrary(nil);
 
   w := width;
   h := height;
-  x := SDL_WINDOWPOS_CENTERED_MASK;
-  y := SDL_WINDOWPOS_CENTERED_MASK;
+  x := SDL_WINDOWPOS_CENTERED;
+  y := SDL_WINDOWPOS_CENTERED;
   flags := SDL_WINDOW_SHOWN or SDL_WINDOW_OPENGL;
+  if fullscreen then
+      flags := flags or SDL_WINDOW_FULLSCREEN_DESKTOP;
   window := SDL_CreateWindow('SDL window', x, y, w, h, flags);
   if window = nil then begin
       writeln ('SDL_CreateWindow failed. Reason: ' + SDL_GetError());
@@ -77,7 +85,10 @@ begin
 
   context := SDL_GL_CreateContext(window);
   SDL_GL_SetSwapInterval(1); //enable VSync
-  glClearColor( 0.0, 0.0, 0.0, 0);
+  if not gladLoadGL(@GLFuncLoad) then
+      writeln('couldn''t load opengl ext!');
+
+  glClearColor(0.0, 0.0, 0.0, 0.0);
 end;
 
 procedure TDisplay.InitGui;
@@ -110,9 +121,9 @@ begin
   in_frame := true;
 end;
 
-procedure TDisplay.DrawFrame;
+procedure TDisplay.PresentFrame;
 begin
-  Assert(in_frame, 'DrawFrame without NewFrame!');
+  Assert(in_frame, 'PresentFrame without NewFrame!');
   SDL_GL_SwapWindow(window);
   in_frame := false;
 end;

@@ -2,7 +2,7 @@ program ImGuiDemo;
 
 uses
   sysutils,
-  sdl2, display,
+  sdl2, display, glad_gl,
   fpimgui, fpimgui_impl_sdlgl2, imgui_extra, TestWindow;
 
 var
@@ -87,7 +87,8 @@ begin
       ImGui.Render;
 
       //show frame on display
-      disp.DrawFrame;
+      disp.PresentFrame;
+      Assert(glGetError() = GL_NO_ERROR);
 
       //handle input
       if SDL_PollEvent(@ev) <> 0 then begin

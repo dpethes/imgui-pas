@@ -15,7 +15,7 @@ unit fpimgui_impl_sdlgl2;
 interface
 
 uses
-  sdl2, gl, glu, GLext,
+  sdl2, glad_gl,
   fpimgui;
 
 procedure ImGui_ImplSdlGL2_Init();
@@ -124,7 +124,6 @@ procedure ImGui_ImplSdlGL2_Init();
 var
   io: PImGuiIO;
 begin
-  Load_GL_version_2_0;
   io := igGetIO();
 
   // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
