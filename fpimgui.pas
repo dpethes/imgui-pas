@@ -792,24 +792,24 @@ public
 
   class function  GetKeyIndex(key: ImGuiKey): longint;  inline;
   class function  IsKeyDown(user_key_index: longint): bool; inline;
-  class function  IsKeyPressed(user_key_index: longint; _repeat: bool): bool; inline;
+  class function  IsKeyPressed(user_key_index: longint; _repeat: bool = true): bool; inline;
   class function  IsKeyReleased(user_key_index: longint): bool; inline;
   class function  IsMouseDown(_button: longint): bool;  inline;
-  class function  IsMouseClicked(_button: longint; _repeat: bool): bool;  inline;
+  class function  IsMouseClicked(_button: longint; _repeat: bool = false): bool;  inline;
   class function  IsMouseDoubleClicked(_button: longint): bool;  inline;
   class function  IsMouseReleased(_button: longint): bool;  inline;
   class function  IsWindowRectHovered: bool;  inline;
   class function  IsAnyWindowHovered: bool;  inline;
   class function  IsMouseHoveringRect(r_min: ImVec2; r_max: ImVec2; clip: bool = true): bool; inline;
-  class function  IsMouseDragging(_button: longint = 0; lock_threshold: single = - 1): bool; inline;
+  class function  IsMouseDragging(_button: longint = 0; lock_threshold: single = -1): bool; inline;
   class function  GetMousePos: ImVec2; inline;
   class function  GetMousePosOnOpeningCurrentPopup: ImVec2; inline;
-  class function  GetMouseDragDelta(_button: longint = 0; lock_threshold: single = - 1): ImVec2; inline;
+  class function  GetMouseDragDelta(_button: longint = 0; lock_threshold: single = -1): ImVec2; inline;
   class procedure ResetMouseDragDelta(_button: longint = 0); inline;
   class function  GetMouseCursor: ImGuiMouseCursor;  inline;
   class procedure SetMouseCursor(_type: ImGuiMouseCursor);  inline;
-  class procedure CaptureKeyboardFromApp(capture: bool);  inline;
-  class procedure CaptureMouseFromApp(capture: bool);  inline;
+  class procedure CaptureKeyboardFromApp(capture: bool = true);  inline;
+  class procedure CaptureMouseFromApp(capture: bool = true);  inline;
 
   { Helpers functions to access functions pointers in ImGui::GetIO() }
   class function  MemAlloc(sz: size_t): pointer;  inline;
