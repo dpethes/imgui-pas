@@ -1110,20 +1110,7 @@ procedure igPlotHistogram(_label: PChar; values: Psingle; values_count: longint;
 //            overlay_text:Pchar; scale_min:single; scale_max:single; graph_size:ImVec2);cdecl;external ImguiLibName;
 procedure igProgressBar(fraction: single; size_arg: PImVec2; overlay: PChar); cdecl; external ImguiLibName;
 
-{ Widgets: Sliders (tip: ctrl+click on a slider to input text) }
-function  igSliderFloat(_label: PChar; v: Psingle; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
-function  igSliderFloat2(_label: PChar; v: TFloat2; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
-function  igSliderFloat3(_label: PChar; v: TFloat3; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
-function  igSliderFloat4(_label: PChar; v: TFloat4; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
-function  igSliderAngle(_label: PChar; v_rad: Psingle; v_degrees_min: single; v_degrees_max: single): bool; cdecl; external ImguiLibName;
-function  igSliderInt(_label: PChar; v: Plongint; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
-function  igSliderInt2(_label: PChar; v: TLongInt2; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
-function  igSliderInt3(_label: PChar; v: TLongInt3; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
-function  igSliderInt4(_label: PChar; v: TLongInt4; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
-function  igVSliderFloat(_label: PChar; size: ImVec2; v: Psingle; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
-function  igVSliderInt(_label: PChar; size: ImVec2; v: Plongint; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
-
-{ Widgets: Drags (tip: ctrl+click on a drag box to input text) }
+{ Widgets: Drags (tip: ctrl+click on a drag box to input with keyboard. manually input values aren't clamped, can go off-bounds) }
 // For all the Float2/Float3/Float4/Int2/Int3/Int4 versions of every functions, remember than a 'float v[3]' function argument is the same as 'float* v'. You can pass address of your first element out of a contiguous set, e.g. &myvector.x
 { If v_max >= v_max we have no bound }
 function  igDragFloat(_label: PChar; v: Psingle; v_speed: single; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
@@ -1154,6 +1141,19 @@ function  igInputInt(_label: PChar; v: Plongint; step: longint; step_fast: longi
 function  igInputInt2(_label: PChar; v: TLongInt2; extra_flags: ImGuiInputTextFlags): bool; cdecl; external ImguiLibName;
 function  igInputInt3(_label: PChar; v: TLongInt3; extra_flags: ImGuiInputTextFlags): bool; cdecl; external ImguiLibName;
 function  igInputInt4(_label: PChar; v: TLongInt4; extra_flags: ImGuiInputTextFlags): bool; cdecl; external ImguiLibName;
+
+{ Widgets: Sliders (tip: ctrl+click on a slider to input text) }
+function  igSliderFloat(_label: PChar; v: Psingle; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
+function  igSliderFloat2(_label: PChar; v: TFloat2; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
+function  igSliderFloat3(_label: PChar; v: TFloat3; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
+function  igSliderFloat4(_label: PChar; v: TFloat4; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
+function  igSliderAngle(_label: PChar; v_rad: Psingle; v_degrees_min: single; v_degrees_max: single): bool; cdecl; external ImguiLibName;
+function  igSliderInt(_label: PChar; v: Plongint; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
+function  igSliderInt2(_label: PChar; v: TLongInt2; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
+function  igSliderInt3(_label: PChar; v: TLongInt3; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
+function  igSliderInt4(_label: PChar; v: TLongInt4; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
+function  igVSliderFloat(_label: PChar; size: ImVec2; v: Psingle; v_min: single; v_max: single; display_format: PChar; power: single): bool; cdecl; external ImguiLibName;
+function  igVSliderInt(_label: PChar; size: ImVec2; v: Plongint; v_min: longint; v_max: longint; display_format: PChar): bool; cdecl; external ImguiLibName;
 
 { Widgets: Trees }
 function  igTreeNode(_label: PChar): bool; cdecl; external ImguiLibName;
@@ -1315,29 +1315,7 @@ procedure igSetCurrentContext(ctx: PImGuiContext); cdecl; external ImguiLibName;
 
 procedure ImFontConfig_DefaultConstructor(config: PImFontConfig); cdecl; external ImguiLibName;
 
-procedure ImFontAtlas_GetTexDataAsRGBA32(atlas: PImFontAtlas; out_pixels: PPByte; out_width, out_height: PInteger; out_bytes_per_pixel: PInteger = nil); cdecl; external ImguiLibName;
-procedure ImFontAtlas_GetTexDataAsAlpha8(atlas: PImFontAtlas; out_pixels: PPByte; out_width, out_height: PInteger; out_bytes_per_pixel: PInteger = nil); cdecl; external ImguiLibName;
-procedure ImFontAtlas_SetTexID(atlas: PImFontAtlas; id: ImTextureID); cdecl; external ImguiLibName;
-
-function  ImFontAtlas_AddFontDefault(atlas: PImFontAtlas; config: PImFontConfig = nil): PImFont; cdecl; external ImguiLibName;
-function  ImFontAtlas_AddFont(atlas: PImFontAtlas; const font_cfg: PImFontConfig): PImFont; cdecl; external ImguiLibName;
-function  ImFontAtlas_AddFontFromFileTTF(atlas: PImFontAtlas; const filename: PChar; size_pixels: single; const font_cfg: PImFontConfig; const glyph_ranges: PImWchar): PImFont; cdecl; external ImguiLibName;
-{todo
-function  ImFontAtlas_AddFontFromMemoryTTF(struct ImFontAtlas* atlas, void* ttf_data, int ttf_size, float size_pixels, CONST struct ImFontConfig* font_cfg, CONST ImWchar* glyph_ranges): PImFont;
-function  ImFontAtlas_AddFontFromMemoryCompressedTTF(struct ImFontAtlas* atlas, CONST void* compressed_ttf_data, int compressed_ttf_size, float size_pixels, CONST struct ImFontConfig* font_cfg, CONST ImWchar* glyph_ranges): PImFont;
-function  ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(struct ImFontAtlas* atlas, CONST char* compressed_ttf_data_base85, float size_pixels, CONST struct ImFontConfig* font_cfg, CONST ImWchar* glyph_ranges): PImFont;
-}
-
-procedure ImFontAtlas_ClearTexData(atlas: PImFontAtlas); cdecl; external ImguiLibName;
-procedure ImFontAtlas_Clear(atlas: PImFontAtlas); cdecl; external ImguiLibName;
-
-function ImFontAtlas_GetGlyphRangesDefault(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
-function ImFontAtlas_GetGlyphRangesKorean(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
-function ImFontAtlas_GetGlyphRangesJapanese(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
-function ImFontAtlas_GetGlyphRangesChinese(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
-function ImFontAtlas_GetGlyphRangesCyrillic(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
-function ImFontAtlas_GetGlyphRangesThai(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
-
+{ ImGuiIO }
 procedure ImGuiIO_AddInputCharacter(c: word); cdecl; external ImguiLibName;
 procedure ImGuiIO_AddInputCharactersUTF8(utf8_chars: pchar); cdecl; external ImguiLibName;
 procedure ImGuiIO_ClearInputCharacters(); cdecl; external ImguiLibName;
@@ -1419,6 +1397,28 @@ procedure ImDrawList_PrimWriteIdx(list: PImDrawList; idx: ImDrawIdx); cdecl; ext
 procedure ImDrawList_PrimVtx(list: PImDrawList; pos: ImVec2; uv: ImVec2; col: ImU32); cdecl; external ImguiLibName;
 procedure ImDrawList_UpdateClipRect(list: PImDrawList); cdecl; external ImguiLibName;
 procedure ImDrawList_UpdateTextureID(list: PImDrawList); cdecl; external ImguiLibName;
+
+
+{ ImFontAtlas }
+procedure ImFontAtlas_GetTexDataAsRGBA32(atlas: PImFontAtlas; out_pixels: PPByte; out_width, out_height: PInteger; out_bytes_per_pixel: PInteger = nil); cdecl; external ImguiLibName;
+procedure ImFontAtlas_GetTexDataAsAlpha8(atlas: PImFontAtlas; out_pixels: PPByte; out_width, out_height: PInteger; out_bytes_per_pixel: PInteger = nil); cdecl; external ImguiLibName;
+procedure ImFontAtlas_SetTexID(atlas: PImFontAtlas; id: ImTextureID); cdecl; external ImguiLibName;
+function  ImFontAtlas_AddFontDefault(atlas: PImFontAtlas; config: PImFontConfig = nil): PImFont; cdecl; external ImguiLibName;
+function  ImFontAtlas_AddFont(atlas: PImFontAtlas; const font_cfg: PImFontConfig): PImFont; cdecl; external ImguiLibName;
+function  ImFontAtlas_AddFontFromFileTTF(atlas: PImFontAtlas; const filename: PChar; size_pixels: single; const font_cfg: PImFontConfig; const glyph_ranges: PImWchar): PImFont; cdecl; external ImguiLibName;
+{todo
+function  ImFontAtlas_AddFontFromMemoryTTF(struct ImFontAtlas* atlas, void* ttf_data, int ttf_size, float size_pixels, CONST struct ImFontConfig* font_cfg, CONST ImWchar* glyph_ranges): PImFont;
+function  ImFontAtlas_AddFontFromMemoryCompressedTTF(struct ImFontAtlas* atlas, CONST void* compressed_ttf_data, int compressed_ttf_size, float size_pixels, CONST struct ImFontConfig* font_cfg, CONST ImWchar* glyph_ranges): PImFont;
+function  ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(struct ImFontAtlas* atlas, CONST char* compressed_ttf_data_base85, float size_pixels, CONST struct ImFontConfig* font_cfg, CONST ImWchar* glyph_ranges): PImFont;
+}
+procedure ImFontAtlas_ClearTexData(atlas: PImFontAtlas); cdecl; external ImguiLibName;
+procedure ImFontAtlas_Clear(atlas: PImFontAtlas); cdecl; external ImguiLibName;
+function ImFontAtlas_GetGlyphRangesDefault(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
+function ImFontAtlas_GetGlyphRangesKorean(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
+function ImFontAtlas_GetGlyphRangesJapanese(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
+function ImFontAtlas_GetGlyphRangesChinese(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
+function ImFontAtlas_GetGlyphRangesCyrillic(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
+function ImFontAtlas_GetGlyphRangesThai(atlas: PImFontAtlas): PImWchar; cdecl; external ImguiLibName;
 
 
 implementation
