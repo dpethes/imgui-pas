@@ -203,7 +203,7 @@ begin
   if ((SDL_GetWindowFlags(window) and SDL_WINDOW_MOUSE_FOCUS) <> 0) then
       io^.MousePos := ImVec2Init(mx, my)   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
   else
-      io^.MousePos := ImVec2Init(-1,-1);
+      io^.MousePos := ImVec2Init(-FLT_MAX, -FLT_MAX);
 
   // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
   io^.MouseDown[0] := g_MousePressed[0] or (mouseMask and SDL_BUTTON(SDL_BUTTON_LEFT) <> 0);

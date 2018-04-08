@@ -24,7 +24,7 @@ begin
         //button was pressed, do something special!
         Inc(counter);
     end;
-    if ImGui.IsItemRectHovered then begin
+    if ImGui.IsItemHovered(ord(ImGuiHoveredFlags_RectOnly)) then begin
         ImGui.SameLine();
         ImGui.Text('button hovered');
     end;
@@ -39,7 +39,7 @@ begin
 
     draw_list^.AddRectFilled(pos, ImVec2Init(pos.x + ImGui.CalcTextSize(pchar('custom rectangles')).x, pos.y + 25), $88005500);
     ImGui.Text('custom rectangles');
-    if ImGui.IsWindowRectHovered then
+    if ImGui.IsWindowHovered(ord(ImGuiHoveredFlags_RectOnly)) then
         ImGui.Text('window hovered')
     else if ImGui.IsAnyWindowHovered then
         ImGui.Text('some window hovered');
