@@ -56,7 +56,6 @@ type
   ImGuiStyleVar = longint;
   ImGuiColorEditFlags = longint;
   ImGuiKey = longint;
-  ImGuiInputTextFlags = longint;
 
   { Enums }
 
@@ -80,6 +79,27 @@ type
       ImGuiWindowFlags_AlwaysVerticalScrollbar= 1 shl 14,  // Always show vertical scrollbar (even if ContentSize.y < Size.y)
       ImGuiWindowFlags_AlwaysHorizontalScrollbar=1shl 15,  // Always show horizontal scrollbar (even if ContentSize.x < Size.x)
       ImGuiWindowFlags_AlwaysUseWindowPadding = 1 shl 16   // Ensure child windows without border uses style.WindowPadding (ignored by default for non-bordered child windows, because more convenient)
+  );
+
+  // Flags for ImGui::InputText()
+  ImGuiInputTextFlags = longint;
+  ImGuiInputTextFlagsEnum = (
+      ImGuiInputTextFlags_CharsDecimal        = 1 shl 0,
+      ImGuiInputTextFlags_CharsHexadecimal    = 1 shl 1,
+      ImGuiInputTextFlags_CharsUppercase      = 1 shl 2,
+      ImGuiInputTextFlags_CharsNoBlank        = 1 shl 3,
+      ImGuiInputTextFlags_AutoSelectAll       = 1 shl 4,
+      ImGuiInputTextFlags_EnterReturnsTrue    = 1 shl 5,
+      ImGuiInputTextFlags_CallbackCompletion  = 1 shl 6,
+      ImGuiInputTextFlags_CallbackHistory     = 1 shl 7,
+      ImGuiInputTextFlags_CallbackAlways      = 1 shl 8,
+      ImGuiInputTextFlags_CallbackCharFilter  = 1 shl 9,
+      ImGuiInputTextFlags_AllowTabInput       = 1 shl 10,
+      ImGuiInputTextFlags_CtrlEnterForNewLine = 1 shl 11,
+      ImGuiInputTextFlags_NoHorizontalScroll  = 1 shl 12,
+      ImGuiInputTextFlags_AlwaysInsertMode    = 1 shl 13,
+      ImGuiInputTextFlags_ReadOnly            = 1 shl 14,
+      ImGuiInputTextFlags_Password            = 1 shl 15
   );
 
   // Flags for ImGui::TreeNodeEx(), ImGui::CollapsingHeader*()
@@ -624,8 +644,8 @@ public
   class function  CheckboxFlags(_label: PChar; flags: Pdword; flags_value: dword): bool;  inline;
   class function  RadioButtonBool(_label: PChar; active: bool): bool;  inline;
   class function  RadioButton(_label: PChar; v: Plongint; v_button: longint): bool;  inline;
-  class function  Combo(_label: PChar; current_item: Plongint; items: PPchar; items_count: longint; height_in_items: longint): bool;  inline;
-  class function  Combo2(_label: PChar; current_item: Plongint; items_separated_by_zeros: PChar; height_in_items: longint): bool;  inline;
+  class function  Combo(_label: string; current_item: Plongint; items: PPchar; items_count: longint; height_in_items: longint): bool;  inline;
+  class function  Combo2(_label: string; current_item: Plongint; items_separated_by_zeros: PChar; height_in_items: longint): bool;  inline;
 
   //todo : func type param
   //function  igCombo3(_label:Pchar; current_item:Plongint; items_getter:function (data:pointer; idx:longint; out_text:PPchar):bool; data:pointer; items_count:longint;
@@ -681,8 +701,8 @@ public
                                 v_min: longint = 0; v_max: longint = 0; display_format: PChar = '%.0f'; display_format_max: PChar = nil): bool;  inline;
 
   { Widgets: Input with Keyboard }
-  class function  InputText(_label: PChar; buf: PChar; buf_size: size_t; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback;   user_data: pointer): bool;  inline;
-  class function  InputTextMultiline(_label: PChar; buf: PChar; buf_size: size_t; size: ImVec2; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback;   user_data: pointer): bool;  inline;
+  class function  InputText(_label: PChar; buf: PChar; buf_size: size_t; flags: ImGuiInputTextFlags = 0; callback: ImGuiTextEditCallback = nil; user_data: pointer = nil): bool;  inline;
+  class function  InputTextMultiline(_label: PChar; buf: PChar; buf_size: size_t; size: ImVec2; flags: ImGuiInputTextFlags = 0; callback: ImGuiTextEditCallback = nil; user_data: pointer = nil): bool;  inline;
   class function  InputFloat(_label: PChar; v: Psingle; step: single; step_fast: single; decimal_precision: longint; extra_flags: ImGuiInputTextFlags): bool;    inline;
   class function  InputFloat2(_label: PChar; v: TFloat2; decimal_precision: longint; extra_flags: ImGuiInputTextFlags): bool;  inline;
   class function  InputFloat3(_label: PChar; v: TFloat3; decimal_precision: longint; extra_flags: ImGuiInputTextFlags): bool;  inline;
@@ -1740,10 +1760,10 @@ class function ImGui.RadioButtonBool(_label: PChar; active: bool): bool;
     begin result := igRadioButtonBool(_label, active) end;
 class function ImGui.RadioButton(_label: PChar; v: Plongint; v_button: longint): bool;
     begin result := igRadioButton(_label, v, v_button) end;
-class function ImGui.Combo(_label: PChar; current_item: Plongint; items: PPchar; items_count: longint; height_in_items: longint): bool;
-    begin result := igCombo(_label, current_item, items, items_count, height_in_items) end;
-class function ImGui.Combo2(_label: PChar; current_item: Plongint; items_separated_by_zeros: PChar; height_in_items: longint): bool;
-    begin result := igCombo2(_label, current_item, items_separated_by_zeros, height_in_items) end;
+class function ImGui.Combo(_label: string; current_item: Plongint; items: PPchar; items_count: longint; height_in_items: longint): bool;
+    begin result := igCombo(pchar(_label), current_item, items, items_count, height_in_items) end;
+class function ImGui.Combo2(_label: string; current_item: Plongint; items_separated_by_zeros: PChar; height_in_items: longint): bool;
+    begin result := igCombo2(pchar(_label), current_item, items_separated_by_zeros, height_in_items) end;
 
 class function ImGui.ColorButton(desc_id: PChar; col: ImVec4; flags: ImGuiColorEditFlags; size: ImVec2): bool;
     begin result := igColorButton(desc_id, col, flags, size) end;
@@ -1818,9 +1838,9 @@ class function ImGui.DragIntRange2(_label: PChar; v_current_min: Plongint; v_cur
 
 { Widgets: Input }
 class function ImGui.InputText(_label: PChar; buf: PChar; buf_size: size_t; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback; user_data: pointer): bool;
-    begin result := igInputText(_label, buf, buf_size, flags, callback,   user_data) end;
+    begin result := igInputText(_label, buf, buf_size, flags, callback, user_data) end;
 class function ImGui.InputTextMultiline(_label: PChar; buf: PChar; buf_size: size_t; size: ImVec2; flags: ImGuiInputTextFlags; callback: ImGuiTextEditCallback; user_data: pointer): bool;
-    begin result := igInputTextMultiline(_label, buf, buf_size, size, flags, callback,   user_data) end;
+    begin result := igInputTextMultiline(_label, buf, buf_size, size, flags, callback, user_data) end;
 class function ImGui.InputFloat(_label: PChar; v: Psingle; step: single; step_fast: single; decimal_precision: longint; extra_flags: ImGuiInputTextFlags): bool;
     begin result := igInputFloat(_label, v, step, step_fast, decimal_precision, extra_flags) end;
 class function ImGui.InputFloat2(_label: PChar; v: TFloat2; decimal_precision: longint; extra_flags: ImGuiInputTextFlags): bool;
