@@ -1489,7 +1489,7 @@ class function ImGui.Begin_(name: string; p_open: Pbool; flags: ImGuiWindowFlags
 class procedure ImGui.End_;
     begin igEnd end;
 class function ImGui.BeginChild(str_id: string; size: ImVec2; border: bool; extra_flags: ImGuiWindowFlags): bool;
-    begin result := BeginChild(PChar(str_id), size, border, extra_flags); end;
+    begin result := igBeginChild(PChar(str_id), size, border, extra_flags); end;
 class function ImGui.BeginChildEx(id: ImGuiID; size: ImVec2; border: bool; extra_flags: ImGuiWindowFlags): bool;
     begin result := igBeginChildEx(id, size, border, extra_flags) end;
 class procedure ImGui.EndChild;
