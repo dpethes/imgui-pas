@@ -34,7 +34,6 @@ type
       show_app_about: boolean;
 
       no_titlebar: boolean;
-      no_border: boolean;
       no_resize: boolean;
       no_move: boolean;
       no_scrollbar: boolean;
@@ -160,7 +159,6 @@ begin
   show_app_about := false;
 
   no_titlebar := false;
-  no_border := true;
   no_resize := false;
   no_move := false;
   no_scrollbar := false;
@@ -176,7 +174,6 @@ var
 begin
   // Demonstrate the various window flags. Typically you would just use the default.
   if (no_titlebar)   then window_flags := window_flags or ord(ImGuiWindowFlags_NoTitleBar);
-  if (not no_border) then window_flags := window_flags or ord(ImGuiWindowFlags_ShowBorders);
   if (no_resize)     then window_flags := window_flags or ord(ImGuiWindowFlags_NoResize);
   if (no_move)       then window_flags := window_flags or ord(ImGuiWindowFlags_NoMove);
   if (no_scrollbar)  then window_flags := window_flags or ord(ImGuiWindowFlags_NoScrollbar);
@@ -237,7 +234,6 @@ begin
   if ImGui.CollapsingHeader('Window options') then
   begin
       ImGui.Checkbox('No titlebar', @no_titlebar); ImGui.SameLine(150);
-      ImGui.Checkbox('No border', @no_border); ImGui.SameLine(300);
       ImGui.Checkbox('No resize', @no_resize);
       ImGui.Checkbox('No move', @no_move); ImGui.SameLine(150);
       ImGui.Checkbox('No scrollbar', @no_scrollbar); ImGui.SameLine(300);

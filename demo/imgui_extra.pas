@@ -40,7 +40,7 @@ begin
   style^.Colors[ImGuiCol_Text] := ImVec4Init( color_for_text.x, color_for_text.y, color_for_text.z, 1.00 );
   style^.Colors[ImGuiCol_TextDisabled] := ImVec4Init( color_for_text.x, color_for_text.y, color_for_text.z, 0.58 );
   style^.Colors[ImGuiCol_WindowBg] := ImVec4Init( color_for_body.x, color_for_body.y, color_for_body.z, 0.95 );
-  style^.Colors[ImGuiCol_ChildWindowBg] := ImVec4Init( color_for_area.x, color_for_area.y, color_for_area.z, 0.58 );
+  style^.Colors[ImGuiCol_ChildBg] := ImVec4Init( color_for_area.x, color_for_area.y, color_for_area.z, 0.58 );
   style^.Colors[ImGuiCol_Border] := ImVec4Init( color_for_body.x, color_for_body.y, color_for_body.z, 0.00 );
   style^.Colors[ImGuiCol_BorderShadow] := ImVec4Init( color_for_body.x, color_for_body.y, color_for_body.z, 0.00 );
   style^.Colors[ImGuiCol_FrameBg] := ImVec4Init( color_for_area.x, color_for_area.y, color_for_area.z, 1.00 );
@@ -54,7 +54,6 @@ begin
   style^.Colors[ImGuiCol_ScrollbarGrab] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.21 );
   style^.Colors[ImGuiCol_ScrollbarGrabHovered] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.78 );
   style^.Colors[ImGuiCol_ScrollbarGrabActive] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 1.00 );
-  style^.Colors[ImGuiCol_ComboBg] := ImVec4Init( color_for_area.x, color_for_area.y, color_for_area.z, 1.00 );
   style^.Colors[ImGuiCol_CheckMark] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.80 );
   style^.Colors[ImGuiCol_SliderGrab] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 0.50 );
   style^.Colors[ImGuiCol_SliderGrabActive] := ImVec4Init( color_for_head.x, color_for_head.y, color_for_head.z, 1.00 );

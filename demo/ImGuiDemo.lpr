@@ -68,6 +68,7 @@ begin
 
   //uncomment to set a different gui theme
   //SetupImGuiStyle2();
+  Imgui.StyleColorsDark(ImGui.GetStyle());
 
   while true do begin
       //begin new frame - clear screen etc.
@@ -77,7 +78,7 @@ begin
       //(do some opengl calls...)
 
       ShowGreetingWindows;        //simple windows
-      ImGui.ShowTestWindow();     //integrated demo: shows just about everything that it can do. See imgui_demo.cpp
+      ImGui.ShowDemoWindow();     //integrated demo: shows just about everything that it can do. See imgui_demo.cpp
       testwin.Show(testwin_open); //partially translated demo
 
       //(...and do some more opengl calls)
