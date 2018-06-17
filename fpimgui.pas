@@ -496,10 +496,6 @@ type
   
   ImFontAtlas = record
       TexID: ImTextureID;
-      TexPixelsAlpha8: pbyte;
-      TexPixelsRGBA32: pInt32;
-      TexWidth: integer;
-      TexHeight: integer;
       TexDesiredWidth: Integer;
       TexGlyphPadding: Integer;
   end;
