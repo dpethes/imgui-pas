@@ -149,6 +149,7 @@ type
   
   ImGuiHoveredFlags = longint;
   ImGuiHoveredFlagsEnum = (
+      ImGuiHoveredFlags_Default      = 0,
       ImGuiHoveredFlags_ChildWindows = 1 shl 0,
       ImGuiHoveredFlags_RootWindow   = 1 shl 1,
       ImGuiHoveredFlags_AllowWhenBlockedByPopup      = 1 shl 2,
@@ -574,6 +575,8 @@ public
   class function  GetWindowHeight: single;  inline;
   class function  IsWindowCollapsed: bool;  inline;
   class procedure SetWindowFontScale(scale: single);  inline;
+
+  class procedure SetNextWindowPos(pos: ImVec2; cond: ImGuiCond; const pivot: ImVec2); inline;
   class procedure SetNextWindowPos(pos: ImVec2; cond: ImGuiCond = 0);  inline;
   class procedure SetNextWindowPosCenter(cond: ImGuiCond = 0);  inline;
   class procedure SetNextWindowSize(size: ImVec2; cond: ImGuiCond = 0);  inline;
@@ -874,7 +877,6 @@ public
 
   { Utilities }
   class function  IsItemHovered(flags: ImGuiHoveredFlags = 0): bool; inline;
-  class procedure SetNextWindowPos(pos: ImVec2; cond: ImGuiCond; const pivot: ImVec2); inline;
   class function  IsItemActive: bool;  inline;
   class function  IsItemClicked(mouse_button: longint = 0): bool;  inline;
   class function  IsItemVisible: bool;  inline;
@@ -884,8 +886,8 @@ public
   class procedure GetItemRectMax(pOut: PImVec2);  inline;
   class procedure GetItemRectSize(pOut: PImVec2);  inline;
   class procedure SetItemAllowOverlap;  inline;
-  class function  IsWindowFocused(flags: ImGuiHoveredFlags): bool; inline;
-  class function  IsWindowHovered(flags: ImGuiHoveredFlags): bool; inline;
+  class function  IsWindowFocused(flags: ImGuiHoveredFlags = 0): bool; inline;
+  class function  IsWindowHovered(flags: ImGuiHoveredFlags = 0): bool; inline;
   class function  IsAnyWindowFocused: bool;  inline;
   class function  IsAnyWindowHovered: bool;  inline;
   class function  IsRectVisible(const item_size: ImVec2): bool;  inline;

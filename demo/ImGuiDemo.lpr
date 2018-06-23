@@ -39,7 +39,7 @@ begin
 
     draw_list^.AddRectFilled(pos, ImVec2Init(pos.x + ImGui.CalcTextSize(pchar('custom rectangles')).x, pos.y + 25), $88005500);
     ImGui.Text('custom rectangles');
-    if ImGui.IsWindowHovered(ord(ImGuiHoveredFlags_RectOnly)) then
+    if ImGui.IsWindowHovered() then
         ImGui.Text('window hovered')
     else if ImGui.IsAnyWindowHovered then
         ImGui.Text('some window hovered');
