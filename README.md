@@ -8,7 +8,7 @@ Builds with Freepascal 3.0.0 and later, other compilers are untested (it should 
 Both 32 and 64bit builds work.
 
 ## Usage
-These bindings wrap the C functions exported from cimgui library, so you need a recent cimgui build to use them. The current version is based on ImGui 1.51.
+These bindings wrap the C functions exported from cimgui library, so you need a recent cimgui build to use them. The current version is based on ImGui 1.53. Windows 32/64bit builds of cimgui are included in releases.
 
 Copy sources and cimgui binary to your project folder. See the examples for how to integrate it with your rendering pipeline and the "getting started" section in imgui.cpp.
 There's also a very basic demo program that draws some ImGui windows in a SDL2 window with OpenGL context.
